@@ -30,9 +30,8 @@ func CreateDatabase(organizationName string, organizationToken string, databaseN
 		log.Errorf("DBPU: CreateDatabase: Error reading body. %v", err)
 		return fmt.Errorf("Error reading body. %v", err)
 	}
-	decoder := decoder.NewDecoder(string(body))
 	var db Db
-	err = decoder.Decode(&db)
+	err = decoder.NewDecoder(string(body)).Decode(&db)
 	if err != nil {
 		log.Errorf("DBPU: CreateDatabase: Error decoding body. %v", err)
 		return fmt.Errorf("Error decoding body. %v", err)
@@ -237,9 +236,8 @@ func GetDatabaseUsage(organizationName string, organizationToken string, databas
 		log.Errorf("DBPU: GetDatabaseDb: Error reading body. %v", err)
 		return Db{}, fmt.Errorf("Error reading body. %v", err)
 	}
-	decoder := decoder.NewDecoder(string(body))
 	var usage Db
-	err = decoder.Decode(&usage)
+	err = decoder.NewDecoder(string(body)).Decode(string(body))
 	if err != nil {
 		log.Errorf("DBPU: GetDatabaseDb: Error decoding body. %v", err)
 		return Db{}, fmt.Errorf("Error decoding body. %v", err)
