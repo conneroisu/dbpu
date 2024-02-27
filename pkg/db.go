@@ -43,3 +43,14 @@ type Db struct {
 	Total         DbTotal      `json:"total"`         // db total usage
 	Uuid          string       `json:"uuid"`          // db uuid
 }
+
+func (db Db) Create () {
+	// is creatable check
+	if !db.isCreatable() {
+		return
+	}
+}
+
+func (*Db) isCreatable ()  bool {
+	return true
+}
