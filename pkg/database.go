@@ -2,10 +2,11 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/bytedance/sonic/decoder"
-	"github.com/charmbracelet/log"
 	"io"
 	"net/http"
+
+	"github.com/bytedance/sonic/decoder"
+	"github.com/charmbracelet/log"
 )
 
 func CreateDatabase(organizationName string, organizationToken string, databaseName string, databaseGroup string) error {
