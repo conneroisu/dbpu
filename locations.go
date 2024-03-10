@@ -1,7 +1,6 @@
-package api
+package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,22 +19,15 @@ func ClosestLocation() (ServerClient, error) {
 	if err != nil {
 		return ServerClient{}, fmt.Errorf("Error creating request. %v", err)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return ServerClient{}, fmt.Errorf("Error sending request. %v", err)
 	}
 	defer resp.Body.Close()
-	response, err := parseServerClient(resp.Body, err)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ServerClient{}, fmt.Errorf("Error decoding body. %v", err)
 	}
+	response, err := parseStruct[ServerClient](body)
 	return response, nil
-}
-
-// parseServerClient parses the response from the server into a ServerClient.
-func parseServerClient(body io.Reader, err error) (ServerClient, error) {
-	var response ServerClient
-	err = json.NewDecoder(body).Decode(&response)
-	return response, err
 }

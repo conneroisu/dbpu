@@ -1,18 +1,37 @@
-package api
+package main
 
 import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/bytedance/sonic/decoder"
 )
 
 // ApiToken is a response to creating a new API token.
 type ApiToken struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Token string `json:"token"`
+	ID    string `json:"id"`    // The ID of the token.
+	Name  string `json:"name"`  // The name of the token.
+	Token string `json:"token"` // The token.
+}
+
+// Token is a response to listing API tokens.
+type Token struct {
+	Id   string `json:"id"`   // The ID of the token.
+	Name string `json:"name"` // The name of the token.
+}
+
+// ListTokens lists the API tokens for the user.
+type ListTokensResponse struct {
+	Tokens []Token `json:"tokens"`
+}
+
+// ValidateTokea is a response to creating a new API token.
+type ValidateTokenResponse struct {
+	Exp int `json:"exp"` // The expiration time of the token.
+}
+
+// RevokeTokenResponse is a response to revoking an API token.
+type RevokeTokenResponse struct {
+	Token string `json:"token"` // The token that was revoked.
 }
 
 // CreateToken creates a new API token with the given name.
@@ -23,32 +42,22 @@ func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
 		return ApiToken{}, fmt.Errorf("Error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error reading body. %v", err)
 	}
-	var apiTokenResponse ApiToken
-	err = decoder.NewDecoder(string(body)).Decode(&apiTokenResponse)
+	apiTokenResponse, err := parseStruct[ApiToken](body)
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error decoding body. %v", err)
 	}
+	defer resp.Body.Close()
 	return apiTokenResponse, nil
 }
 
-// ValidateTokea is a response to creating a new API token.
-type ValidateTokenResponse struct {
-	Exp int `json:"exp"`
-}
-
-//	curl -L 'https://api.turso.tech/v1/auth/validate' \
-//	  -H 'Authorization: Bearer TOKEN'
-//
 // ValidateToken validates the given API token beloning to a user.
 func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
 	url := fmt.Sprintf(TursoEndpoint + "/auth/validate")
@@ -57,8 +66,7 @@ func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
 		return ValidateTokenResponse{}, fmt.Errorf("Error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return ValidateTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
@@ -67,29 +75,11 @@ func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
 	if err != nil {
 		return ValidateTokenResponse{}, fmt.Errorf("Error reading body. %v", err)
 	}
-	parseDatabaseResponse, err := parseValidateTokenResponse(body, err)
+	parseDatabaseResponse, err := parseStruct[ValidateTokenResponse](body)
 	if err != nil {
 		return ValidateTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
 	return parseDatabaseResponse, nil
-}
-
-// parseDatabaseResponse parses the response from the server into a DatabaseResponse.
-func parseValidateTokenResponse(body []byte, err error) (ValidateTokenResponse, error) {
-	var response ValidateTokenResponse
-	err = decoder.NewDecoder(string(body)).Decode(&response)
-	return response, err
-}
-
-// Token is a response to listing API tokens.
-type Token struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// ListTokens lists the API tokens for the user.
-type ListTokensResponse struct {
-	Tokens []Token `json:"tokens"`
 }
 
 // ListTokens lists the API tokens for the user.
@@ -100,8 +90,7 @@ func ListTokens(apiToken string) (ListTokensResponse, error) {
 		return ListTokensResponse{}, fmt.Errorf("Error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
@@ -110,27 +99,14 @@ func ListTokens(apiToken string) (ListTokensResponse, error) {
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error reading body. %v", err)
 	}
-	parseDatabaseResponse, err := parseListTokensResponse(body, err)
+	parseDatabaseResponse, err := parseStruct[ListTokensResponse](body)
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
 	return parseDatabaseResponse, nil
 }
 
-// parseDatabaseResponse parses the response from the server into a DatabaseResponse.
-func parseListTokensResponse(body []byte, err error) (ListTokensResponse, error) {
-	var response ListTokensResponse
-	err = decoder.NewDecoder(string(body)).Decode(&response)
-	return response, err
-}
-
-// RevokeTokenResponse is a response to revoking an API token.
-type RevokeTokenResponse struct {
-	Token string `json:"token"`
-}
-
-// curl -L -X DELETE 'https://api.turso.tech/v1/auth/api-tokens/{tokenName}' \
-// -H 'Authorization: Bearer TOKEN'
+// RevokeToken revokes the given API token.
 func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error) {
 	url := fmt.Sprintf(TursoEndpoint + "/auth/api-tokens/" + tokenName)
 	req, err := http.NewRequest("DELETE", url, nil)
@@ -138,8 +114,7 @@ func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error)
 		return RevokeTokenResponse{}, fmt.Errorf("Error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
@@ -148,16 +123,9 @@ func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error reading body. %v", err)
 	}
-	parseDatabaseResponse, err := parseRevokeTokenResponse(body, err)
+	parseDatabaseResponse, err := parseStruct[RevokeTokenResponse](body)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
 	return parseDatabaseResponse, nil
-}
-
-// parseDatabaseResponse parses the response from the server into a DatabaseResponse.
-func parseRevokeTokenResponse(body []byte, err error) (RevokeTokenResponse, error) {
-	var response RevokeTokenResponse
-	err = decoder.NewDecoder(string(body)).Decode(&response)
-	return response, err
 }
