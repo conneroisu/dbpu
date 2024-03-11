@@ -1,3 +1,3 @@
 package dbpu
 
-const TursoEndpoint = "https://api.turso.tech/v1"
+const tursoEndpoint = "https://api.turso.tech/v1"
