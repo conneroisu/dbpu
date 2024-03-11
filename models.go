@@ -14,7 +14,7 @@ type Jwt struct {
 }
 
 // parseStruct parses the response from a byte array into the provided type.
-// T is a type parameter that will be replaced by any type that satisfies the AnyData interface.
+// T is a type parameter that will be replaced by any type that satisfies the any interface.
 func parseStruct[T any](body []byte) (T, error) {
 	var data T
 	err := decoder.NewDecoder(string(body)).Decode(&data)
@@ -26,6 +26,7 @@ func parseStruct[T any](body []byte) (T, error) {
 }
 
 // parseResponse parses the response from an HTTP request into the provided type.
+// T is a type parameter that will be replaced by any type that satisfies the any interface.
 func parseResponse[T any](response *http.Response) (T, error) {
 	body, err := io.ReadAll(response.Body)
 	var data T
