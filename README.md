@@ -2,7 +2,7 @@
 
 Golang database per user for turso db.
 
-![dbpu-logo](./assets/dbpu.png | width=100)
+<img src='./assets/dbpu.png' width='25'>
 
 ## Installation
 

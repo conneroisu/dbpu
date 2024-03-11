@@ -4,8 +4,9 @@ import (
 	"testing"
 )
 
+// TestParsing tests the parsing functions in respect to the strcutures declared in tokens.go.
 func TestParsing(t *testing.T) {
-	// Test the parse api token.
+	// Test the parse api token response with a test id, name and token.
 	t.Run("Test Parse Api Token", func(t *testing.T) {
 		body := []byte(`{"id":"test","name":"test","token":"test"}`)
 		apiToken, err := parseStruct[ApiToken](body)
@@ -23,7 +24,7 @@ func TestParsing(t *testing.T) {
 		}
 	})
 
-	// Test the parse token.
+	// Test the parse token response with a test id and name.
 	t.Run("Test Parse Token", func(t *testing.T) {
 		body := []byte(`{"id":"test","name":"test"}`)
 		token, err := parseStruct[Token](body)
@@ -38,7 +39,7 @@ func TestParsing(t *testing.T) {
 		}
 	})
 
-	// Test the parse list tokens response.
+	// Test the parse list tokens response with a test id and name.
 	t.Run("Test Parse List Tokens Response", func(t *testing.T) {
 		body := []byte(`{"tokens":[{"id":"test","name":"test"}]}`)
 		listTokensResponse, err := parseStruct[ListTokensResponse](body)
@@ -93,8 +94,8 @@ func TestCreateCreateTokenRquest(t *testing.T) {
 		if req.Method != "POST" {
 			t.Errorf("Expected method to be POST, got %v", req.Method)
 		}
-		if req.URL.String() != TursoEndpoint+"/auth/api-tokens/"+tokenName {
-			t.Errorf("Expected URL to be %s, got %v", TursoEndpoint+"/auth/api-tokens/"+tokenName, req.URL.String())
+		if req.URL.String() != tursoEndpoint+"/auth/api-tokens/"+tokenName {
+			t.Errorf("Expected URL to be %s, got %v", tursoEndpoint+"/auth/api-tokens/"+tokenName, req.URL.String())
 		}
 	})
 }

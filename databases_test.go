@@ -16,7 +16,7 @@ func TestCreateCreateDatabaseRequest(t *testing.T) {
 		Type:    "type",
 		Regions: []string{"region1", "region2"},
 	}
-	req, err := createCreateDatabaseRequest(org, db)
+	req, err := createCreateDatabaseRequest(org.Token, org.Name, db.Name, db.Group)
 	if err != nil {
 		t.Errorf("Error creating request. %v", err)
 	}

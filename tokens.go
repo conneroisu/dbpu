@@ -36,7 +36,7 @@ type RevokeTokenResponse struct {
 
 // CreateCreateTokenRequest creates a request for creating a new API token.j
 func CreateCreateTokenRequest(tokenName string) (*http.Request, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/auth/api-tokens/%s", tokenName)
+	url := fmt.Sprintf(tursoEndpoint+"/auth/api-tokens/%s", tokenName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating request. %v", err)
@@ -68,7 +68,7 @@ func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
 
 // ValidateToken validates the given API token beloning to a user.
 func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint + "/auth/validate")
+	url := fmt.Sprintf(tursoEndpoint + "/auth/validate")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return ValidateTokenResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -92,7 +92,7 @@ func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
 
 // ListTokens lists the API tokens for the user.
 func ListTokens(apiToken string) (ListTokensResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint + "/auth/api-tokens")
+	url := fmt.Sprintf(tursoEndpoint + "/auth/api-tokens")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -116,7 +116,7 @@ func ListTokens(apiToken string) (ListTokensResponse, error) {
 
 // RevokeToken revokes the given API token.
 func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint + "/auth/api-tokens/" + tokenName)
+	url := fmt.Sprintf(tursoEndpoint + "/auth/api-tokens/" + tokenName)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error reading request. %v", err)

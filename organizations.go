@@ -90,7 +90,7 @@ func WithType(orgType string) UpdateOrganiationOptions {
 
 // createListOrganizationsRequest returns a new http.Request for listing organizations.
 func createListOrganizationsRequest(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations", TursoEndpoint)
+	url := fmt.Sprintf("%s/organizations", tursoEndpoint)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading request. %v", err)
@@ -143,7 +143,7 @@ func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptio
 func createUpdateOrganizationRequest(orgName string, config Org) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s",
-		TursoEndpoint, orgName,
+		tursoEndpoint, orgName,
 	)
 	reqJsonBody := fmt.Sprintf(
 		`{

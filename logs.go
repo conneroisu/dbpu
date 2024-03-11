@@ -8,7 +8,7 @@ import (
 
 // CreateGetAuditLogsRequest creates a request for GetAuditLogs.
 func CreateGetAuditLogsRequest(apiToken string, orgName string) (*http.Request, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/audit-logs", orgName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/audit-logs", orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading request. %v", err)

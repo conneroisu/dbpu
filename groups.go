@@ -28,7 +28,7 @@ type ListGroupsResponse struct {
 
 // AddLocation adds a location to a group.
 func AddLocation(orgName string, apiToken string, groupName string, location string) (GroupResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return GroupResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -52,7 +52,7 @@ func AddLocation(orgName string, apiToken string, groupName string, location str
 
 // ListGroups lists the groups in an organization.
 func ListGroups(orgName string, apiToken string) (ListGroupsResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups", orgName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups", orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return ListGroupsResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -77,7 +77,7 @@ func ListGroups(orgName string, apiToken string) (ListGroupsResponse, error) {
 
 // CreateGroup creates a group in an organization.
 func CreateGroup(orgName string, apiToken string, groupName string, location string) (GroupResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups", orgName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups", orgName)
 	payload := fmt.Sprintf(`{"name": "%s", "location": "%s"}`, groupName, location)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
@@ -103,7 +103,7 @@ func CreateGroup(orgName string, apiToken string, groupName string, location str
 
 // GetGroup gets a group in an organization.
 func GetGroup(orgName string, apiToken string, groupName string) (GroupResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s", orgName, groupName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s", orgName, groupName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return GroupResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -127,7 +127,7 @@ func GetGroup(orgName string, apiToken string, groupName string) (GroupResponse,
 
 // DeleteGroup deletes a group in an organization.
 func DeleteGroup(orgName string, apiToken string, groupName string) error {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s", orgName, groupName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s", orgName, groupName)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading request. %v", err)
@@ -144,7 +144,7 @@ func DeleteGroup(orgName string, apiToken string, groupName string) error {
 
 // TransferGroup transfers a group to a new organization.
 func TransferGroup(orgName string, apiToken string, groupName string, newOrgName string) (Group, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/transfer", orgName, groupName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/transfer", orgName, groupName)
 	payload := fmt.Sprintf(`{"organization": "%s"}`, newOrgName)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
@@ -170,7 +170,7 @@ func TransferGroup(orgName string, apiToken string, groupName string, newOrgName
 
 // AddLocationToGroup adds a location to a group.
 func AddLocationToGroup(orgName string, apiToken string, groupName string, location string) (GroupResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return GroupResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -194,7 +194,7 @@ func AddLocationToGroup(orgName string, apiToken string, groupName string, locat
 
 // RemoveLocationFromGroup removes a location from a group.
 func RemoveLocationFromGroup(orgName string, apiToken string, groupName string, location string) (GroupResponse, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return GroupResponse{}, fmt.Errorf("Error reading request. %v", err)
@@ -218,7 +218,7 @@ func RemoveLocationFromGroup(orgName string, apiToken string, groupName string, 
 
 // UpdateVersionGroup updates the version group.
 func UpdateVersionGroup(orgName string, apiToken string, groupName string) error {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/update", orgName, groupName)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/update", orgName, groupName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading request. %v", err)
@@ -234,7 +234,7 @@ func UpdateVersionGroup(orgName string, apiToken string, groupName string) error
 
 // CreateGroupToken creates a token for a group.
 func CreateGroupToken(orgName string, apiToken string, groupName string, expiration string, authorization string) (Jwt, error) {
-	url := fmt.Sprintf(TursoEndpoint+"/organizations/%s/groups/%s/auth/tokens?expiration=%s&authorization=%s", orgName, groupName, expiration, authorization)
+	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/auth/tokens?expiration=%s&authorization=%s", orgName, groupName, expiration, authorization)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return Jwt{}, fmt.Errorf("Error reading request. %v", err)
@@ -258,7 +258,7 @@ func CreateGroupToken(orgName string, apiToken string, groupName string, expirat
 
 // InvalidateGroupTokens invalidates all tokens for a group.
 func InvalidateGroupTokens(orgName string, apiToken string, groupName string) error {
-	url := fmt.Sprintf("%s/organizations/%s/groups/%s/auth/rotate", TursoEndpoint, orgName, groupName)
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s/auth/rotate", tursoEndpoint, orgName, groupName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading request. %v", err)
