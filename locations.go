@@ -12,12 +12,21 @@ type ServerClient struct {
 	Client string `json:"client"`
 }
 
-// ClosestLocation returns the closest location to the given latitude and longitude.
-func ClosestLocation() (ServerClient, error) {
+// CreateClosestLocationRequest creates a request for ClosestLocation.
+func CreateClosestLocationRequest() (*http.Request, error) {
 	url := fmt.Sprintf("https://region.turso.io/")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return ServerClient{}, fmt.Errorf("Error creating request. %v", err)
+		return nil, fmt.Errorf("Error creating request. %v", err)
+	}
+	return req, nil
+}
+
+// ClosestLocation returns the closest location to the given latitude and longitude.
+func ClosestLocation() (ServerClient, error) {
+	req, err := CreateClosestLocationRequest()
+	if err != nil {
+		return ServerClient{}, fmt.Errorf("Error reading request. %v", err)
 	}
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {

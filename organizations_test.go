@@ -44,4 +44,11 @@ func TestUpdateOrganizationConfigs(t *testing.T) {
 			t.Errorf("Expected Overages to be true, got %v", org.Overages)
 		}
 	})
+
+	t.Run("Test With Slug", func(t *testing.T) {
+		org := NewUpdateOrganiationConfig(Org{}, WithSlug("test"))
+		if org.Slug != "test" {
+			t.Errorf("Expected Slug to be test, got %v", org.Slug)
+		}
+	})
 }

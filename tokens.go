@@ -34,14 +34,22 @@ type RevokeTokenResponse struct {
 	Token string `json:"token"` // The token that was revoked.
 }
 
-// CreateToken creates a new API token with the given name.
-func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
+// CreateCreateTokenRequest creates a request for creating a new API token.j
+func CreateCreateTokenRequest(tokenName string) (*http.Request, error) {
 	url := fmt.Sprintf(TursoEndpoint+"/auth/api-tokens/%s", tokenName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
+		return nil, fmt.Errorf("Error creating request. %v", err)
+	}
+	return req, nil
+}
+
+// CreateToken creates a new API token with the given name.
+func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
+	req, err := CreateCreateTokenRequest(tokenName)
+	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error sending request. %v", err)

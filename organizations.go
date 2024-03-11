@@ -9,13 +9,13 @@ import (
 
 // Org is a response to listing organizations.
 type Org struct {
-	BlockedReads  bool   `json:"blocked_reads"`
-	BlockedWrites bool   `json:"blocked_writes"`
-	Name          string `json:"name"`
-	Overages      bool   `json:"overages"`
-	Slug          string `json:"slug"`
-	Type          string `json:"type"`
-	Token         string `json:"token"`
+	BlockedReads  bool   `json:"blocked_reads"`  // indicates if the organization is blocked from reading data
+	BlockedWrites bool   `json:"blocked_writes"` // indicates if the organization is blocked from writing data
+	Name          string `json:"name"`           // the name of the organization
+	Overages      bool   `json:"overages"`       // indicates if the organization is over its limits
+	Slug          string `json:"slug"`           // the slug of the organization
+	Type          string `json:"type"`           // the type of the organization
+	Token         string `json:"token"`          // the token of the organization
 }
 
 // UpdateOrganiationOptions is a functional collective option type for updating an organization.
@@ -24,18 +24,18 @@ type UpdateOrganiationOptions func(*Org)
 
 // AuditLogs is a response to listing organizations.
 type AuditLogs struct {
-	AuditLogs  []AuditLog `json:"audit_logs"`
-	Pagination Pagination `json:"pagination"`
+	AuditLogs  []AuditLog `json:"audit_logs"` // the audit logs
+	Pagination Pagination `json:"pagination"` // the pagination
 }
 
 // AuditLog is a response to listing organizations.
 type AuditLog struct {
-	Author    string `json:"author"`
-	Code      string `json:"code"`
-	CreatedAt string `json:"created_at"`
-	Data      string `json:"data"`
-	Message   string `json:"message"`
-	Origin    string `json:"origin"`
+	Author    string `json:"author"`     // the author of the audit log
+	Code      string `json:"code"`       // the code of the audit log
+	CreatedAt string `json:"created_at"` // the creation date of the audit log
+	Data      string `json:"data"`       // the data of the audit log
+	Message   string `json:"message"`    // the message of the audit log
+	Origin    string `json:"origin"`     // the origin of the audit log
 }
 
 // Pagination is a response to listing organizations.
