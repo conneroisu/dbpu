@@ -2,6 +2,8 @@ package dbpu
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/bytedance/sonic/decoder"
 )
@@ -20,5 +22,20 @@ func parseStruct[T any](body []byte) (T, error) {
 		// Zero value of T is returned in case of an error. Use default(T) when Go 1.18+ syntax is not recognized.
 		return data, fmt.Errorf("error decoding body: %v", err)
 	}
+	return data, nil
+}
+
+// parseResponse parses the response from an HTTP request into the provided type.
+func parseResponse[T any](response *http.Response) (T, error) {
+	body, err := io.ReadAll(response.Body)
+	var data T
+	if err != nil {
+		return data, fmt.Errorf("io failed to read response body: %v", err)
+	}
+	data, err = parseStruct[T](body)
+	if err != nil {
+		return data, fmt.Errorf("failed to parse response body: %v", err)
+	}
+	defer response.Body.Close()
 	return data, nil
 }

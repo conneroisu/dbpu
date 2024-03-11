@@ -2,7 +2,6 @@ package dbpu
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -54,11 +53,7 @@ func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ApiToken{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	apiTokenResponse, err := parseStruct[ApiToken](body)
+	apiTokenResponse, err := parseResponse[ApiToken](resp)
 	if err != nil {
 		return ApiToken{}, fmt.Errorf("Error decoding body. %v", err)
 	}
@@ -79,11 +74,7 @@ func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
 		return ValidateTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ValidateTokenResponse{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	parseDatabaseResponse, err := parseStruct[ValidateTokenResponse](body)
+	parseDatabaseResponse, err := parseResponse[ValidateTokenResponse](resp)
 	if err != nil {
 		return ValidateTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
@@ -102,15 +93,11 @@ func ListTokens(apiToken string) (ListTokensResponse, error) {
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ListTokensResponse{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	parseDatabaseResponse, err := parseStruct[ListTokensResponse](body)
+	parseDatabaseResponse, err := parseResponse[ListTokensResponse](resp)
 	if err != nil {
 		return ListTokensResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
+	defer resp.Body.Close()
 	return parseDatabaseResponse, nil
 }
 
@@ -126,14 +113,10 @@ func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return RevokeTokenResponse{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	parseDatabaseResponse, err := parseStruct[RevokeTokenResponse](body)
+	parseDatabaseResponse, err := parseResponse[RevokeTokenResponse](resp)
 	if err != nil {
 		return RevokeTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
 	}
+	defer resp.Body.Close()
 	return parseDatabaseResponse, nil
 }

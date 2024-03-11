@@ -2,7 +2,6 @@ package dbpu
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -32,11 +31,7 @@ func ClosestLocation() (ServerClient, error) {
 	if err != nil {
 		return ServerClient{}, fmt.Errorf("Error sending request. %v", err)
 	}
+	response, err := parseResponse[ServerClient](resp)
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ServerClient{}, fmt.Errorf("Error decoding body. %v", err)
-	}
-	response, err := parseStruct[ServerClient](body)
 	return response, nil
 }

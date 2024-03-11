@@ -3,7 +3,6 @@ package dbpu
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -110,11 +109,7 @@ func ListOrganizations(apiToken string) ([]Org, error) {
 		return []Org{}, fmt.Errorf("Error sending request. %v", err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return []Org{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	response, err := parseStruct[[]Org](body)
+	response, err := parseResponse[[]Org](resp)
 	if err != nil {
 		return []Org{}, fmt.Errorf("Error decoding body. %v", err)
 	}
@@ -178,11 +173,7 @@ func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiat
 	if err != nil {
 		return Org{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return Org{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	response, err := parseStruct[Org](body)
+	response, err := parseResponse[Org](resp)
 	if err != nil {
 		return Org{}, fmt.Errorf("Error decoding body. %v", err)
 	}

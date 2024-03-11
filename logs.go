@@ -2,7 +2,6 @@ package dbpu
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -27,11 +26,7 @@ func GetAuditLogs(apiToken string, orgName string) (AuditLogs, error) {
 	if err != nil {
 		return AuditLogs{}, fmt.Errorf("Error sending request. %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return AuditLogs{}, fmt.Errorf("Error reading body. %v", err)
-	}
-	response, err := parseStruct[AuditLogs](body)
+	response, err := parseResponse[AuditLogs](resp)
 	if err != nil {
 		return AuditLogs{}, fmt.Errorf("Error decoding body. %v", err)
 	}

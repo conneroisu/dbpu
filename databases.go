@@ -3,7 +3,6 @@ package dbpu
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -93,13 +92,9 @@ func CreateDatabase(orgToken string, orgName string, name string, group string) 
 	if err != nil {
 		return Db{}, fmt.Errorf("error sending request. %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
+	response, err := parseResponse[DatabaseResponse](resp)
 	if err != nil {
-		return Db{}, fmt.Errorf("error reading body. %v", err)
-	}
-	response, err := parseStruct[DatabaseResponse](body)
-	if err != nil {
-		return Db{}, fmt.Errorf("error decoding body. %v", err)
+		return Db{}, fmt.Errorf("error reading response. %v", err)
 	}
 	defer resp.Body.Close()
 	return response.Database, nil
@@ -130,11 +125,7 @@ func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...C
 	if err != nil {
 		return Jwt{}, fmt.Errorf("failed to send request for database token: %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return Jwt{}, fmt.Errorf("failed to read response body: %v", err)
-	}
-	jwt, err := parseStruct[Jwt](body)
+	jwt, err := parseResponse[Jwt](resp)
 	if err != nil {
 		return Jwt{}, fmt.Errorf("failed to parse response body: %v", err)
 	}
@@ -167,11 +158,7 @@ func ListDatabases(orgName string, orgToken string) (Databases, error) {
 	if err != nil {
 		return Databases{}, fmt.Errorf("error sending request: %v", err)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return Databases{}, fmt.Errorf("error reading body: %v", err)
-	}
-	dbs, err := parseStruct[Databases](body)
+	dbs, err := parseResponse[Databases](resp)
 	if err != nil {
 		return Databases{}, fmt.Errorf("error decoding body: %v", err)
 	}
