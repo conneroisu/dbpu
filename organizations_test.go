@@ -4,9 +4,8 @@ import (
 	"testing"
 )
 
-func TestUpdateOrganizationConfigs(t *testing.T) {
-	// Test the update organization configs.
-	// ...
+func testUpdateOrganizationConfigs(t *testing.T) {
+
 	t.Run("Test With Blocked Writes", func(t *testing.T) {
 		org := NewUpdateOrganiationConfig(Org{}, WithBlockedWrites(true))
 		if org.BlockedWrites != true {

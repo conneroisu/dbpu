@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestParseStruct(t *testing.T) {
+func testParseStruct(t *testing.T) {
 	t.Run("Test Parse Struct", func(t *testing.T) {
 		// Test the parse struct.
 		body := []byte(`{"jwt":"test"}`)

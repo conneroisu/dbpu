@@ -23,6 +23,11 @@ type ListToksResp struct {
 	Tokens []Token `json:"tokens"`
 }
 
+// Jwt is a JSON Web Token.
+type Jwt struct {
+	Jwt string `json:"jwt"` // jwt is the JSON Web Token.
+}
+
 // ValidTokResp is a response to creating a new API token.
 type ValidTokResp struct {
 	Exp int `json:"exp"`
@@ -39,7 +44,7 @@ func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
 	resp, doErr := (&http.Client{}).Do(req)
 	apiTokenResp, parErr := parseResponse[ApiToken](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[ApiToken](apiTokenResp, reqErr, doErr, parErr)
+	return resolveApiCall(apiTokenResp, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // ValidateToken validates the given API token beloning to a user.
@@ -48,7 +53,7 @@ func ValidateToken(apiToken string) (ValidTokResp, error) {
 	resp, doErr := (&http.Client{}).Do(req)
 	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[ValidTokResp](parseDatabaseResponse, reqErr, doErr, parErr)
+	return resolveApiCall(parseDatabaseResponse, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // ListTokens lists the API tokens for the user.
@@ -57,7 +62,7 @@ func ListTokens(apiToken string) (ListToksResp, error) {
 	resp, doErr := (&http.Client{}).Do(req)
 	parsed, respErr := parseResponse[ListToksResp](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[ListToksResp](parsed, reqErr, doErr, respErr)
+	return resolveApiCall(parsed, withReqError(reqErr), withDoError(doErr), withParError(respErr))
 }
 
 // RevokeToken revokes the given API token.
@@ -66,7 +71,7 @@ func RevokeToken(apiToken string, tokenName string) (RevokeTokResp, error) {
 	resp, doErr := (&http.Client{}).Do(req)
 	revokeTokResponse, parErr := parseResponse[RevokeTokResp](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[RevokeTokResp](revokeTokResponse, reqErr, doErr, parErr)
+	return resolveApiCall(revokeTokResponse, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // newCreateTokenRequest creates a request for creating a new API token.

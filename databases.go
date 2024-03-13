@@ -65,7 +65,7 @@ func CreateDatabase(orgToken string, orgName string, name string, group string) 
 	resp, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[DbResp](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[Db](response.Database, reqErr, doErr, parErr)
+	return resolveApiCall(response.Database, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
@@ -75,7 +75,7 @@ func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...n
 	resp, doErr := (&http.Client{}).Do(req)
 	jwt, parErr := parseResponse[Jwt](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[Jwt](jwt, reqErr, doErr, parErr)
+	return resolveApiCall(jwt, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // ListDatabases lists all databases for an organization.
@@ -84,7 +84,7 @@ func ListDatabases(orgName string, orgToken string) (Dbs, error) {
 	resp, doErr := (&http.Client{}).Do(req)
 	dbs, parErr := parseResponse[Dbs](resp)
 	defer resp.Body.Close()
-	return resolveApiCall[Dbs](dbs, reqErr, doErr, parErr)
+	return resolveApiCall(dbs, withReqError(reqErr), withDoError(doErr), withParError(parErr))
 }
 
 // newListDatabasesReq creates a request for listing all databases in an organization.

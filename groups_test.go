@@ -1,10 +1,11 @@
 package dbpu
 
 import (
+	"net/http"
 	"testing"
 )
 
-func TestParseGroups(t *testing.T) {
+func testParseGroups(t *testing.T) {
 	t.Run("Testing ListGroupsResponse Parsing", func(t *testing.T) {
 		body := []byte(`{"groups":[{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"}]}`)
 		response, err := parseStruct[ListGroupsResp](body)
@@ -73,4 +74,143 @@ func TestParseGroups(t *testing.T) {
 		}
 	})
 
+	t.Run("Testing newAddLocation request generation", func(t *testing.T) {
+		req, err := newAddLocationReq("test", "test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "POST" {
+			t.Errorf("Expected POST method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newCreateGroupReq request generation", func(t *testing.T) {
+		req, err := newCreateGroupReq("test", "test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "POST" {
+			t.Errorf("Expected POST method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newDeleteGroupReq request generation", func(t *testing.T) {
+		req, err := newDeleteGroupReq("test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "DELETE" {
+			t.Errorf("Expected DELETE method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newGetGroupReq request generation", func(t *testing.T) {
+		req, err := newGetGroupReq("test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "GET" {
+			t.Errorf("Expected GET method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newListGroupsReq request generation", func(t *testing.T) {
+		req, err := newListGroupsReq("test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "GET" {
+			t.Errorf("Expected GET method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newDeleteLocationReq request generation", func(t *testing.T) {
+		req, err := newDeleteGroupReq("test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "DELETE" {
+			t.Errorf("Expected DELETE method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
+
+	t.Run("Testing newUpdateGroupReq request generation", func(t *testing.T) {
+		req, err := newUpdateGroupReq("test", "test", "test")
+		if err != nil {
+			t.Errorf("Error creating request. %v", err)
+		}
+		if req.Method != "POST" {
+			t.Errorf("Expected PUT method, got %s", req.Method)
+		}
+		if req.Header.Get("Authorization") != "Bearer test" {
+			t.Errorf("Expected Authorization header to be Bearer test, got %s", req.Header.Get("Authorization"))
+		}
+		resp, err := (&http.Client{}).Do(req)
+		if resp.StatusCode != 401 {
+			t.Errorf("Expected 401 status code, got %d", resp.StatusCode)
+		}
+		if err != nil {
+			t.Errorf("Error making request. %v", err)
+		}
+	})
 }

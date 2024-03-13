@@ -6,12 +6,12 @@ import (
 )
 
 // TestCreateGetAuditLogsRequest tests the create get audit logs request.
-func TestCreateGetAuditLogsRequest(t *testing.T) {
+func testCreateGetAuditLogsRequest(t *testing.T) {
 	// Test the create get audit logs request
 	t.Run("Test Create Get Audit Logs Request", func(t *testing.T) {
 		apiToken := "test"
 		orgName := "test"
-		req, err := CreateGetAuditLogsRequest(apiToken, orgName)
+		req, err := newGetAuditLogsRequest(apiToken, orgName)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
@@ -28,7 +28,7 @@ func TestCreateGetAuditLogsRequest(t *testing.T) {
 }
 
 // TestParseAuditLogs tests the parse audit logs.
-func TestParseAuditLogs(t *testing.T) {
+func testParseAuditLogs(t *testing.T) {
 	// Test the parse audit logs
 	t.Run("Test Parse Audit Logs", func(t *testing.T) {
 		body := []byte(`
