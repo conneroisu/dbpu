@@ -32,6 +32,9 @@ func ClosestLocation() (ServerClient, error) {
 		return ServerClient{}, fmt.Errorf("Error sending request. %v", err)
 	}
 	response, err := parseResponse[ServerClient](resp)
+	if err != nil {
+		return ServerClient{}, fmt.Errorf("Error decoding body. %v", err)
+	}
 	defer resp.Body.Close()
 	return response, nil
 }

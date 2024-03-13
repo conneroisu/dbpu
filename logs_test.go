@@ -31,7 +31,19 @@ func TestCreateGetAuditLogsRequest(t *testing.T) {
 func TestParseAuditLogs(t *testing.T) {
 	// Test the parse audit logs
 	t.Run("Test Parse Audit Logs", func(t *testing.T) {
-		body := []byte(`{"audit_logs":[{"author":"test","code":"test","created_at":"test","data":"test","message":"test","origin":"test"}],"pagination":{"page":1,"page_size":1,"total_pages":1,"total_rows":1}}`)
+		body := []byte(`
+		{
+			"audit_logs":[ 
+				{
+					"author":"test",
+					"code":"test",
+					"created_at":"test",
+					"data":"test",
+					"message":"test",
+					"origin":"test"
+				}
+			],
+		"pagination":{"page":1,"page_size":1,"total_pages":1,"total_rows":1}}`)
 
 		auditLogs, err := parseStruct[AuditLogs](body)
 		if err != nil {

@@ -1,6 +1,7 @@
 package dbpu
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,7 +20,6 @@ func parseStruct[T any](body []byte) (T, error) {
 	var data T
 	err := decoder.NewDecoder(string(body)).Decode(&data)
 	if err != nil {
-		// Zero value of T is returned in case of an error. Use default(T) when Go 1.18+ syntax is not recognized.
 		return data, fmt.Errorf("error decoding body: %v", err)
 	}
 	return data, nil
@@ -39,4 +39,12 @@ func parseResponse[T any](response *http.Response) (T, error) {
 	}
 	defer response.Body.Close()
 	return data, nil
+}
+
+// resolveApiCall resolves the API call by joining the request, do, and parse errors.
+func resolveApiCall[Obj any](obj Obj, reqErr error, doErr error, parErr error) (Obj, error) {
+	if err := errors.Join(reqErr, doErr, parErr); err != nil {
+		return obj, fmt.Errorf("error resolving API. %v", err)
+	}
+	return obj, nil
 }

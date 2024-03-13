@@ -18,27 +18,106 @@ type Db struct {
 	Version       string   `json:"version"`
 }
 
-// Databases is a list of dbs.
-type Databases struct {
+// Dbs is a list of dbs.
+type Dbs struct {
 	Databases []Db `json:"databases"`
 }
 
-// DatabaseResponse is a response to creating a database.
-type DatabaseResponse struct {
+// DbResp is a response to creating a database.
+type DbResp struct {
 	Database Db `json:"database"`
 }
 
-// createDatabaseTokenConfig is a configuration for creating a database token.
-type createDatabaseTokenConfig struct {
+// DbTokenConfig is a configuration for creating a database token.
+type DbTokenConfig struct {
 	expiration    string // Expiration time for the token (e.g., 2w1d30m).
 	authorization string // Authorization level for the token (full-access or read-only).
 }
 
-// CreateDatabaseTokenOption is a functional option for configuring a CreateDatabaseTokenConfig.
-type CreateDatabaseTokenOption func(*createDatabaseTokenConfig)
+// newDbTokenOpt is a functional option for configuring a CreateDatabaseTokenConfig.
+type newDbTokenOpt func(*DbTokenConfig)
 
-// createCreateDatabaseRequest returns a new http.Request for creating a database.
-func createCreateDatabaseRequest(orgToken string, orgName string, name string, group string) (*http.Request, error) {
+// NewCreateDatabaseTokenConfig returns a new CreateDatabaseTokenConfig.
+func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
+	c := &DbTokenConfig{
+		expiration:    "",
+		authorization: "",
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
+}
+
+// WithExpiration sets the expiration time for the token (e.g., 2w1d30m).
+func WithExpiration(expiration string) newDbTokenOpt {
+	return func(c *DbTokenConfig) { c.expiration = expiration }
+}
+
+// WithAuthorization sets the authorization level for the token (full-access or read-only).
+func WithAuthorization(authorization string) newDbTokenOpt {
+	return func(c *DbTokenConfig) { c.authorization = authorization }
+}
+
+// CreateDatabase creates a database with the given name and group.
+func CreateDatabase(orgToken string, orgName string, name string, group string) (Db, error) {
+	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
+	resp, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[DbResp](resp)
+	defer resp.Body.Close()
+	return resolveApiCall[Db](response.Database, reqErr, doErr, parErr)
+}
+
+// CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
+func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
+	config := newDbTokenConfig(opts...)
+	req, reqErr := newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
+	resp, doErr := (&http.Client{}).Do(req)
+	jwt, parErr := parseResponse[Jwt](resp)
+	defer resp.Body.Close()
+	return resolveApiCall[Jwt](jwt, reqErr, doErr, parErr)
+}
+
+// ListDatabases lists all databases for an organization.
+func ListDatabases(orgName string, orgToken string) (Dbs, error) {
+	req, reqErr := newListDatabasesReq(orgName, orgToken)
+	resp, doErr := (&http.Client{}).Do(req)
+	dbs, parErr := parseResponse[Dbs](resp)
+	defer resp.Body.Close()
+	return resolveApiCall[Dbs](dbs, reqErr, doErr, parErr)
+}
+
+// newListDatabasesReq creates a request for listing all databases in an organization.
+func newListDatabasesReq(orgName string, orgToken string) (*http.Request, error) {
+	url := fmt.Sprintf(
+		"%s/organizations/%s/databases",
+		tursoEndpoint, orgName,
+	)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error reading request: %v", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+// newCreateDatabaseTokenReq creates a request for creating a token for a database owned by an organization.
+func newCreateDatabaseTokenReq(orgName string, dbName string, apiTok string, config *DbTokenConfig) (*http.Request, error) {
+	url := fmt.Sprintf(
+		"%s/organizations/%s/databases/%s/auth/tokens?expiration=%s&authorization=%s",
+		tursoEndpoint, orgName, dbName, config.expiration, config.authorization,
+	)
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for database token: %v", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiTok))
+	return req, nil
+}
+
+// newCreateDatabaseReq returns a new http.Request for creating a database.
+func newCreateDatabaseReq(orgToken string, orgName string, name string, group string) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s/databases",
 		tursoEndpoint, orgName,
@@ -58,110 +137,4 @@ func createCreateDatabaseRequest(orgToken string, orgName string, name string, g
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
 	req.Header.Set("Content-Type", "application/json")
 	return req, nil
-}
-
-// NewCreateDatabaseTokenConfig returns a new CreateDatabaseTokenConfig.
-func newCreateDatabaseTokenConfig(opts ...CreateDatabaseTokenOption) *createDatabaseTokenConfig {
-	c := &createDatabaseTokenConfig{
-		expiration:    "",
-		authorization: "",
-	}
-	for _, opt := range opts {
-		opt(c)
-	}
-	return c
-}
-
-// WithExpiration sets the expiration time for the token (e.g., 2w1d30m).
-func WithExpiration(expiration string) CreateDatabaseTokenOption {
-	return func(c *createDatabaseTokenConfig) { c.expiration = expiration }
-}
-
-// WithAuthorization sets the authorization level for the token (full-access or read-only).
-func WithAuthorization(authorization string) CreateDatabaseTokenOption {
-	return func(c *createDatabaseTokenConfig) { c.authorization = authorization }
-}
-
-// CreateDatabase creates a database with the given name and group.
-func CreateDatabase(orgToken string, orgName string, name string, group string) (Db, error) {
-	req, err := createCreateDatabaseRequest(orgToken, orgName, name, group)
-	if err != nil {
-		return Db{}, fmt.Errorf("error reading request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return Db{}, fmt.Errorf("error sending request. %v", err)
-	}
-	response, err := parseResponse[DatabaseResponse](resp)
-	if err != nil {
-		return Db{}, fmt.Errorf("error reading response. %v", err)
-	}
-	defer resp.Body.Close()
-	return response.Database, nil
-}
-
-// createCreateDatabaseTokenRequest creates a request for creating a token for a database owned by an organization with an optional given expiration and authorization.
-func createCreateDatabaseTokenRequest(orgName string, dbName string, apiTok string, opts ...CreateDatabaseTokenOption) (*http.Request, error) {
-	config := newCreateDatabaseTokenConfig(opts...)
-	url := fmt.Sprintf(
-		"%s/organizations/%s/databases/%s/auth/tokens?expiration=%s&authorization=%s",
-		tursoEndpoint, orgName, dbName, config.expiration, config.authorization,
-	)
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request for database token: %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiTok))
-	return req, nil
-}
-
-// CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
-func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...CreateDatabaseTokenOption) (Jwt, error) {
-	req, err := createCreateDatabaseTokenRequest(orgName, dbName, apiTok, opts...)
-	if err != nil {
-		return Jwt{}, fmt.Errorf("failed to create request for database token: %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return Jwt{}, fmt.Errorf("failed to send request for database token: %v", err)
-	}
-	jwt, err := parseResponse[Jwt](resp)
-	if err != nil {
-		return Jwt{}, fmt.Errorf("failed to parse response body: %v", err)
-	}
-	defer resp.Body.Close()
-	return jwt, nil
-}
-
-// createListDatabasesRequest creates a request for listing all databases in an organization.
-func createListDatabasesRequest(orgName string, orgToken string) (*http.Request, error) {
-	url := fmt.Sprintf(
-		"%s/organizations/%s/databases",
-		tursoEndpoint, orgName,
-	)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request: %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
-	req.Header.Set("Content-Type", "application/json")
-	return req, nil
-}
-
-// ListDatabases lists all databases in an organization.
-func ListDatabases(orgName string, orgToken string) (Databases, error) {
-	req, err := createListDatabasesRequest(orgName, orgToken)
-	if err != nil {
-		return Databases{}, fmt.Errorf("error reading request: %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return Databases{}, fmt.Errorf("error sending request: %v", err)
-	}
-	dbs, err := parseResponse[Databases](resp)
-	if err != nil {
-		return Databases{}, fmt.Errorf("error decoding body: %v", err)
-	}
-	defer resp.Body.Close()
-	return dbs, nil
 }

@@ -7,116 +7,107 @@ import (
 
 // ApiToken is a response to creating a new API token.
 type ApiToken struct {
-	ID    string `json:"id"`    // The ID of the token.
-	Name  string `json:"name"`  // The name of the token.
-	Token string `json:"token"` // The token.
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }
 
 // Token is a response to listing API tokens.
 type Token struct {
-	Id   string `json:"id"`   // The ID of the token.
-	Name string `json:"name"` // The name of the token.
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
-// ListTokens lists the API tokens for the user.
-type ListTokensResponse struct {
+// ListToksResp is a response to listing API tokens.
+type ListToksResp struct {
 	Tokens []Token `json:"tokens"`
 }
 
-// ValidateTokea is a response to creating a new API token.
-type ValidateTokenResponse struct {
-	Exp int `json:"exp"` // The expiration time of the token.
+// ValidTokResp is a response to creating a new API token.
+type ValidTokResp struct {
+	Exp int `json:"exp"`
 }
 
-// RevokeTokenResponse is a response to revoking an API token.
-type RevokeTokenResponse struct {
-	Token string `json:"token"` // The token that was revoked.
-}
-
-// CreateCreateTokenRequest creates a request for creating a new API token.j
-func CreateCreateTokenRequest(tokenName string) (*http.Request, error) {
-	url := fmt.Sprintf(tursoEndpoint+"/auth/api-tokens/%s", tokenName)
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating request. %v", err)
-	}
-	return req, nil
+// RevokeTokResp is a response to revoking an API token.
+type RevokeTokResp struct {
+	Token string `json:"token"`
 }
 
 // CreateToken creates a new API token with the given name.
 func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
-	req, err := CreateCreateTokenRequest(tokenName)
-	if err != nil {
-		return ApiToken{}, fmt.Errorf("Error reading request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return ApiToken{}, fmt.Errorf("Error sending request. %v", err)
-	}
-	apiTokenResponse, err := parseResponse[ApiToken](resp)
-	if err != nil {
-		return ApiToken{}, fmt.Errorf("Error decoding body. %v", err)
-	}
+	req, reqErr := newCreateTokenRequest(tokenName)
+	resp, doErr := (&http.Client{}).Do(req)
+	apiTokenResp, parErr := parseResponse[ApiToken](resp)
 	defer resp.Body.Close()
-	return apiTokenResponse, nil
+	return resolveApiCall[ApiToken](apiTokenResp, reqErr, doErr, parErr)
 }
 
 // ValidateToken validates the given API token beloning to a user.
-func ValidateToken(apiToken string) (ValidateTokenResponse, error) {
-	url := fmt.Sprintf(tursoEndpoint + "/auth/validate")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return ValidateTokenResponse{}, fmt.Errorf("Error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return ValidateTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
-	}
+func ValidateToken(apiToken string) (ValidTokResp, error) {
+	req, reqErr := newValidateTokenRequest(apiToken)
+	resp, doErr := (&http.Client{}).Do(req)
+	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](resp)
 	defer resp.Body.Close()
-	parseDatabaseResponse, err := parseResponse[ValidateTokenResponse](resp)
-	if err != nil {
-		return ValidateTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
-	}
-	return parseDatabaseResponse, nil
+	return resolveApiCall[ValidTokResp](parseDatabaseResponse, reqErr, doErr, parErr)
 }
 
 // ListTokens lists the API tokens for the user.
-func ListTokens(apiToken string) (ListTokensResponse, error) {
-	url := fmt.Sprintf(tursoEndpoint + "/auth/api-tokens")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return ListTokensResponse{}, fmt.Errorf("Error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return ListTokensResponse{}, fmt.Errorf("Error sending request. %v", err)
-	}
-	parseDatabaseResponse, err := parseResponse[ListTokensResponse](resp)
-	if err != nil {
-		return ListTokensResponse{}, fmt.Errorf("Error decoding body. %v", err)
-	}
+func ListTokens(apiToken string) (ListToksResp, error) {
+	req, reqErr := newListTokensRequest(apiToken)
+	resp, doErr := (&http.Client{}).Do(req)
+	parsed, respErr := parseResponse[ListToksResp](resp)
 	defer resp.Body.Close()
-	return parseDatabaseResponse, nil
+	return resolveApiCall[ListToksResp](parsed, reqErr, doErr, respErr)
 }
 
 // RevokeToken revokes the given API token.
-func RevokeToken(apiToken string, tokenName string) (RevokeTokenResponse, error) {
-	url := fmt.Sprintf(tursoEndpoint + "/auth/api-tokens/" + tokenName)
-	req, err := http.NewRequest("DELETE", url, nil)
+func RevokeToken(apiToken string, tokenName string) (RevokeTokResp, error) {
+	req, reqErr := newRevokeTokenRequest(apiToken, tokenName)
+	resp, doErr := (&http.Client{}).Do(req)
+	revokeTokResponse, parErr := parseResponse[RevokeTokResp](resp)
+	defer resp.Body.Close()
+	return resolveApiCall[RevokeTokResp](revokeTokResponse, reqErr, doErr, parErr)
+}
+
+// newCreateTokenRequest creates a request for creating a new API token.
+func newCreateTokenRequest(tokenName string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/auth/api-tokens/%s", tursoEndpoint, tokenName)
+	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		return RevokeTokenResponse{}, fmt.Errorf("Error reading request. %v", err)
+		return nil, fmt.Errorf("error creating request. %v", err)
+	}
+	return req, nil
+}
+
+// newValidateTokenRequest creates a request for validating an API token.
+func newValidateTokenRequest(apiToken string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/auth/validate", tursoEndpoint)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	resp, err := (&http.Client{}).Do(req)
+	return req, nil
+}
+
+// newListTokensRequest creates a request for listing API tokens.
+func newListTokensRequest(apiToken string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/auth/api-tokens", tursoEndpoint)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return RevokeTokenResponse{}, fmt.Errorf("Error sending request. %v", err)
+		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	parseDatabaseResponse, err := parseResponse[RevokeTokenResponse](resp)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	return req, nil
+}
+
+// newRevokeTokenRequest creates a request for revoking an API token.
+func newRevokeTokenRequest(apiToken string, tokenName string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/auth/api-tokens/%s", tursoEndpoint, tokenName)
+	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		return RevokeTokenResponse{}, fmt.Errorf("Error decoding body. %v", err)
+		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	defer resp.Body.Close()
-	return parseDatabaseResponse, nil
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	return req, nil
 }

@@ -74,8 +74,7 @@ func WithOverages(overages bool) UpdateOrganiationOptions {
 }
 
 // WithSlug is a functional configuration for updating an organization.
-// It sets the Slug field of an organization when used with
-// NewUpdateOrganiationConfig.
+// It sets the Slug field of an organization.
 func WithSlug(slug string) UpdateOrganiationOptions {
 	return func(c *Org) { c.Slug = slug }
 }
@@ -87,31 +86,20 @@ func WithType(orgType string) UpdateOrganiationOptions {
 	return func(c *Org) { c.Type = orgType }
 }
 
-// createListOrganizationsRequest returns a new http.Request for listing organizations.
-func createListOrganizationsRequest(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations", tursoEndpoint)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("Error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
 // ListOrganizations lists the organizations that the user has access to.
 func ListOrganizations(apiToken string) ([]Org, error) {
-	req, err := createListOrganizationsRequest(apiToken)
+	req, err := newListOrganizationsRequest(apiToken)
 	if err != nil {
-		return []Org{}, fmt.Errorf("Error reading request. %v", err)
+		return []Org{}, fmt.Errorf("error reading request. %v", err)
 	}
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
-		return []Org{}, fmt.Errorf("Error sending request. %v", err)
+		return []Org{}, fmt.Errorf("error sending request. %v", err)
 	}
 	defer resp.Body.Close()
 	response, err := parseResponse[[]Org](resp)
 	if err != nil {
-		return []Org{}, fmt.Errorf("Error decoding body. %v", err)
+		return []Org{}, fmt.Errorf("error decoding body. %v", err)
 	}
 	return response, nil
 }
@@ -132,10 +120,30 @@ func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptio
 	return config
 }
 
+// UpdateOrganiation updates the organization with the given name.
+// It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
+func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
+	config := NewUpdateOrganiationConfig(organization, opts...)
+	req, err := newUpdateOrganizationRequest(organization.Name, config)
+	if err != nil {
+		return Org{}, fmt.Errorf("error reading request. %v", err)
+	}
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return Org{}, fmt.Errorf("error sending request. %v", err)
+	}
+	response, err := parseResponse[Org](resp)
+	if err != nil {
+		return Org{}, fmt.Errorf("error decoding body. %v", err)
+	}
+	defer resp.Body.Close()
+	return response, nil
+}
+
 // NewUpdateOrganizationRequest returns a new http.Request for updating an organization.
 // It is used to update an organization with the UpdateOrganization function.
 // It is not exported.
-func createUpdateOrganizationRequest(orgName string, config Org) (*http.Request, error) {
+func newUpdateOrganizationRequest(orgName string, config Org) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s",
 		tursoEndpoint, orgName,
@@ -161,22 +169,13 @@ func createUpdateOrganizationRequest(orgName string, config Org) (*http.Request,
 	return req, err
 }
 
-// UpdateOrganiation updates the organization with the given name.
-// It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
-func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
-	config := NewUpdateOrganiationConfig(organization, opts...)
-	req, err := createUpdateOrganizationRequest(organization.Name, config)
+// newListOrganizationsRequest returns a new http.Request for listing organizations.
+func newListOrganizationsRequest(apiToken string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations", tursoEndpoint)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return Org{}, fmt.Errorf("Error reading request. %v", err)
+		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return Org{}, fmt.Errorf("Error sending request. %v", err)
-	}
-	response, err := parseResponse[Org](resp)
-	if err != nil {
-		return Org{}, fmt.Errorf("Error decoding body. %v", err)
-	}
-	defer resp.Body.Close()
-	return response, nil
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	return req, nil
 }

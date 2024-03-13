@@ -8,7 +8,13 @@ import (
 func TestParsing(t *testing.T) {
 	// Test the parse api token response with a test id, name and token.
 	t.Run("Test Parse Api Token", func(t *testing.T) {
-		body := []byte(`{"id":"test","name":"test","token":"test"}`)
+		body := []byte(`
+			{
+				"id":"test",
+				"name":"test",
+				"token":"test"
+			}
+		`)
 		apiToken, err := parseStruct[ApiToken](body)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -87,7 +93,7 @@ func TestCreateCreateTokenRquest(t *testing.T) {
 	// Test the create create token request.
 	t.Run("Test Create Create Token Request", func(t *testing.T) {
 		tokenName := "test"
-		req, err := CreateCreateTokenRequest(tokenName)
+		req, err := newCreateTokenRequest(tokenName)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
