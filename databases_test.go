@@ -36,7 +36,7 @@ func TestCreateCreateDatabaseRequest(t *testing.T) {
 	// make the request and check the response if it is not 401
 	resp, err := (&http.Client{}).Do(req)
 	if resp.StatusCode != 401 {
-		t.Errorf("expected status code 401. Got %d", resp.StatusCode)
+		t.Errorf("expected 401 status code. Got %d", resp.StatusCode)
 	}
 	if err != nil {
 		t.Errorf("error making request. %v", err)

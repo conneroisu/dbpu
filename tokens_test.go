@@ -48,7 +48,7 @@ func TestParsing(t *testing.T) {
 	// Test the parse list tokens response with a test id and name.
 	t.Run("Test Parse List Tokens Response", func(t *testing.T) {
 		body := []byte(`{"tokens":[{"id":"test","name":"test"}]}`)
-		listTokensResponse, err := parseStruct[ListTokensResponse](body)
+		listTokensResponse, err := parseStruct[ListToksResp](body)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
@@ -66,7 +66,7 @@ func TestParsing(t *testing.T) {
 	// Test the parse validate token response.
 	t.Run("Test Parse Validate Token Response", func(t *testing.T) {
 		body := []byte(`{"exp":1}`)
-		validateTokenResponse, err := parseStruct[ValidateTokenResponse](body)
+		validateTokenResponse, err := parseStruct[ValidTokResp](body)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
@@ -78,7 +78,7 @@ func TestParsing(t *testing.T) {
 	// Test the parse revoke token response.
 	t.Run("Test Parse Revoke Token Response", func(t *testing.T) {
 		body := []byte(`{"token":"test"}`)
-		revokeTokenResponse, err := parseStruct[RevokeTokenResponse](body)
+		revokeTokenResponse, err := parseStruct[RevokeTokResp](body)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}

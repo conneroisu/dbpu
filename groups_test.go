@@ -7,7 +7,7 @@ import (
 func TestParseGroups(t *testing.T) {
 	t.Run("Testing ListGroupsResponse Parsing", func(t *testing.T) {
 		body := []byte(`{"groups":[{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"}]}`)
-		response, err := parseStruct[ListGroupsResponse](body)
+		response, err := parseStruct[ListGroupsResp](body)
 		if err != nil {
 			t.Errorf("Error decoding body. %v", err)
 		}
@@ -21,7 +21,7 @@ func TestParseGroups(t *testing.T) {
 
 	t.Run("Testing ListGroupsResponse Parsing with bad body", func(t *testing.T) {
 		body := []byte(`{"groups":[{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"}]`)
-		_, err := parseStruct[ListGroupsResponse](body)
+		_, err := parseStruct[ListGroupsResp](body)
 		if err == nil {
 			t.Errorf("Expected error decoding body, got nil")
 		}
@@ -29,7 +29,7 @@ func TestParseGroups(t *testing.T) {
 
 	t.Run("Testing GroupResponse Parsing", func(t *testing.T) {
 		body := []byte(`{"group":{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"}}`)
-		response, err := parseStruct[GroupResponse](body)
+		response, err := parseStruct[GroupResp](body)
 		if err != nil {
 			t.Errorf("Error decoding body. %v", err)
 		}
@@ -40,7 +40,7 @@ func TestParseGroups(t *testing.T) {
 
 	t.Run("Testing GroupResponse Parsing with bad body", func(t *testing.T) {
 		body := []byte(`{"group":{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"`)
-		_, err := parseStruct[GroupResponse](body)
+		_, err := parseStruct[GroupResp](body)
 		if err == nil {
 			t.Errorf("Expected error decoding body, got nil")
 		}
@@ -48,7 +48,7 @@ func TestParseGroups(t *testing.T) {
 
 	t.Run("Testing GroupResponse Parsing with bad body", func(t *testing.T) {
 		body := []byte(`{"group":{"archived":false,"locations":["us-east-1"],"name":"test","primary":"us-east-1","uuid":"1"`)
-		_, err := parseStruct[GroupResponse](body)
+		_, err := parseStruct[GroupResp](body)
 		if err == nil {
 			t.Errorf("Expected error decoding body, got nil")
 		}
