@@ -5,17 +5,6 @@ import (
 	"net/http"
 )
 
-// ServerClient is a struct that contains the server and client locations.
-type ServerClient struct {
-	Server string `json:"server"`
-	Client string `json:"client"`
-}
-
-// Locations is a list of locations.
-type Locations struct {
-	Locations map[string]string `json:"locations"`
-}
-
 // ClosestLocation returns the closest location to the given latitude and longitude.
 func ClosestLocation() (ServerClient, error) {
 	req, reqErr := newClosestLocationRequest()
