@@ -41,37 +41,37 @@ type RevokeTokResp struct {
 // CreateToken creates a new API token with the given name.
 func CreateToken(apiToken, tokenName string) (ApiToken, error) {
 	req, reqErr := newCreateTokenRequest(tokenName)
-	resp, doErr := (&http.Client{}).Do(req)
-	apiTokenResp, parErr := parseResponse[ApiToken](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(apiTokenResp, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	apiTokenResp, parErr := parseResponse[ApiToken](done)
+	defer done.Body.Close()
+	return resolveApiCall(apiTokenResp, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ValidateToken validates the given API token beloning to a user.
 func ValidateToken(apiToken string) (ValidTokResp, error) {
 	req, reqErr := newValidateTokenRequest(apiToken)
-	resp, doErr := (&http.Client{}).Do(req)
-	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(parseDatabaseResponse, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](done)
+	defer done.Body.Close()
+	return resolveApiCall(parseDatabaseResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListTokens lists the API tokens for the user.
 func ListTokens(apiToken string) (ListToksResp, error) {
 	req, reqErr := newListTokensRequest(apiToken)
-	resp, doErr := (&http.Client{}).Do(req)
-	parsed, respErr := parseResponse[ListToksResp](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(parsed, withReqError(reqErr), withDoError(doErr), withParError(respErr))
+	done, doErr := (&http.Client{}).Do(req)
+	parsed, respErr := parseResponse[ListToksResp](done)
+	defer done.Body.Close()
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(respErr))
 }
 
 // RevokeToken revokes the given API token.
 func RevokeToken(apiToken, tokenName string) (RevokeTokResp, error) {
 	req, reqErr := newRevokeTokenRequest(apiToken, tokenName)
-	resp, doErr := (&http.Client{}).Do(req)
-	revokeTokResponse, parErr := parseResponse[RevokeTokResp](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(revokeTokResponse, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	revokeTokResponse, parErr := parseResponse[RevokeTokResp](done)
+	defer done.Body.Close()
+	return resolveApiCall(revokeTokResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // newCreateTokenRequest creates a request for creating a new API token.

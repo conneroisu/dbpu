@@ -8,10 +8,10 @@ import (
 // GetAuditLogs gets the audit logs for the given organization.
 func GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
 	req, reqErr := newGetAuditLogsRequest(apiToken, orgName)
-	resp, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[AuditLogs](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(response, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[AuditLogs](done)
+	defer done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // newGetAuditLogsRequest creates a request for GetAuditLogs.

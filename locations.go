@@ -11,30 +11,21 @@ type ServerClient struct {
 	Client string `json:"client"`
 }
 
-// CreateClosestLocationRequest creates a request for ClosestLocation.
-func CreateClosestLocationRequest() (*http.Request, error) {
+// ClosestLocation returns the closest location to the given latitude and longitude.
+func ClosestLocation() (ServerClient, error) {
+	req, reqErr := newClosestLocationRequest()
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[ServerClient](done)
+	defer done.Body.Close()
+	return resolveApiCall(response, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+}
+
+// newClosestLocationRequest creates a request for ClosestLocation.
+func newClosestLocationRequest() (*http.Request, error) {
 	url := fmt.Sprintf("https://region.turso.io/")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating request. %v", err)
 	}
 	return req, nil
-}
-
-// ClosestLocation returns the closest location to the given latitude and longitude.
-func ClosestLocation() (ServerClient, error) {
-	req, err := CreateClosestLocationRequest()
-	if err != nil {
-		return ServerClient{}, fmt.Errorf("Error reading request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return ServerClient{}, fmt.Errorf("Error sending request. %v", err)
-	}
-	response, err := parseResponse[ServerClient](resp)
-	if err != nil {
-		return ServerClient{}, fmt.Errorf("Error decoding body. %v", err)
-	}
-	defer resp.Body.Close()
-	return response, nil
 }

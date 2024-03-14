@@ -62,29 +62,29 @@ func WithAuthorization(authorization string) newDbTokenOpt {
 // CreateDatabase creates a database with the given name and group.
 func CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
 	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
-	resp, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[DbResp](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(response.Database, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[DbResp](done)
+	defer done.Body.Close()
+	return resolveApiCall(response.Database, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
 func CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
 	config := newDbTokenConfig(opts...)
 	req, reqErr := newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
-	resp, doErr := (&http.Client{}).Do(req)
-	jwt, parErr := parseResponse[Jwt](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(jwt, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	jwt, parErr := parseResponse[Jwt](done)
+	defer done.Body.Close()
+	return resolveApiCall(jwt, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListDatabases lists all databases for an organization.
 func ListDatabases(orgName, orgToken string) (Dbs, error) {
 	req, reqErr := newListDatabasesReq(orgName, orgToken)
-	resp, doErr := (&http.Client{}).Do(req)
-	dbs, parErr := parseResponse[Dbs](resp)
-	defer resp.Body.Close()
-	return resolveApiCall(dbs, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	done, doErr := (&http.Client{}).Do(req)
+	dbs, parErr := parseResponse[Dbs](done)
+	defer done.Body.Close()
+	return resolveApiCall(dbs, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // newListDatabasesReq creates a request for listing all databases in an organization.

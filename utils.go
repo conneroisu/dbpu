@@ -46,22 +46,22 @@ type resolveApiConfig struct {
 // resolveApiOpt is a functional option for setting the request, do, and parse errors in the resolveApiConfig.
 type resolveApiOpt func(*resolveApiConfig)
 
-// withReqError is a functional option for setting the request error in the resolveApiConfig.
-func withReqError(err error) resolveApiOpt {
+// wReqError is a functional option for setting the request error in the resolveApiConfig.
+func wReqError(err error) resolveApiOpt {
 	return func(c *resolveApiConfig) {
 		c.ReqError = err
 	}
 }
 
-// withDoError is a functional option for setting the do error in the resolveApiConfig.
-func withDoError(err error) resolveApiOpt {
+// wDoError is a functional option for setting the do error in the resolveApiConfig.
+func wDoError(err error) resolveApiOpt {
 	return func(c *resolveApiConfig) {
 		c.DoError = err
 	}
 }
 
-// withParError is a functional option for setting the parse error in the resolveApiConfig.
-func withParError(err error) resolveApiOpt {
+// wParError is a functional option for setting the parse error in the resolveApiConfig.
+func wParError(err error) resolveApiOpt {
 	return func(c *resolveApiConfig) {
 		c.ParError = err
 	}

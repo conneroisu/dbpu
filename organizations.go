@@ -18,7 +18,6 @@ type Org struct {
 }
 
 // UpdateOrganiationOptions is a functional collective option type for updating an organization.
-// It is used to update an organization with the NewUpdateOrganiationConfig function.
 type UpdateOrganiationOptions func(*Org)
 
 // AuditLogs is a response to listing organizations.
@@ -88,20 +87,11 @@ func WithType(orgType string) UpdateOrganiationOptions {
 
 // ListOrganizations lists the organizations that the user has access to.
 func ListOrganizations(apiToken string) ([]Org, error) {
-	req, err := newListOrganizationsRequest(apiToken)
-	if err != nil {
-		return []Org{}, fmt.Errorf("error reading request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return []Org{}, fmt.Errorf("error sending request. %v", err)
-	}
-	defer resp.Body.Close()
-	response, err := parseResponse[[]Org](resp)
-	if err != nil {
-		return []Org{}, fmt.Errorf("error decoding body. %v", err)
-	}
-	return response, nil
+	req, reqErr := newListOrganizationsRequest(apiToken)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[[]Org](done)
+	done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // NewUpdateOrganiationConfig returns a new UpdateOrganiationConfig.
@@ -124,20 +114,11 @@ func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptio
 // It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
 func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
 	config := NewUpdateOrganiationConfig(organization, opts...)
-	req, err := newUpdateOrganizationRequest(organization.Name, config)
-	if err != nil {
-		return Org{}, fmt.Errorf("error reading request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return Org{}, fmt.Errorf("error sending request. %v", err)
-	}
-	response, err := parseResponse[Org](resp)
-	if err != nil {
-		return Org{}, fmt.Errorf("error decoding body. %v", err)
-	}
-	defer resp.Body.Close()
-	return response, nil
+	req, reqErr := newUpdateOrganizationRequest(organization.Name, config)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[Org](done)
+	done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // NewUpdateOrganizationRequest returns a new http.Request for updating an organization.
