@@ -7,25 +7,6 @@ import (
 	"net/http"
 )
 
-// Group is a group in the turso API.
-type Group struct {
-	Archived      bool     `json:"archived"`
-	Locations     []string `json:"locations"`
-	Name          string   `json:"name"`
-	PrimaryRegion string   `json:"primary"`
-	Uuid          string   `json:"uuid"`
-}
-
-// GroupResp is a response to adding a location to a group.
-type GroupResp struct {
-	Group Group `json:"group"`
-}
-
-// ListGroupsResp is a response to listing groups.
-type ListGroupsResp struct {
-	Groups []Group `json:"groups"`
-}
-
 // AddLocation adds a location to a group.
 func AddLocation(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, reqErr := newAddLocationReq(orgName, apiToken, groupName, location)
@@ -57,9 +38,18 @@ func CreateGroup(orgName, apiToken, groupName, location string) (GroupResp, erro
 func GetGroup(orgName, apiToken, groupName string) (GroupResp, error) {
 	req, reqErr := newGetGroupReq(orgName, apiToken, groupName)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[GroupResp](done)
+	parsed, parErr := parseResponse[GroupResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
+// TransferGroup transfers a group to a new organization.
+func TransferGroup(orgName, apiToken, groupName, newOrgName string) (Group, error) {
+	req, reqErr := newTransferGroupReq(orgName, apiToken, groupName, newOrgName)
+	done, doErr := (&http.Client{}).Do(req)
+	parsed, parErr := parseResponse[Group](done)
+	defer done.Body.Close()
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // DeleteGroup deletes a group in an organization.
@@ -70,22 +60,13 @@ func DeleteGroup(orgName, apiToken, groupName string) (*http.Response, error) {
 	return resolveApiCall(done, wReqError(err), wDoError(err))
 }
 
-// TransferGroup transfers a group to a new organization.
-func TransferGroup(orgName, apiToken, groupName, newOrgName string) (Group, error) {
-	req, reqErr := newTransferGroupReq(orgName, apiToken, groupName, newOrgName)
-	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[Group](done)
-	defer done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
-}
-
 // AddLocationToGroup adds a location to a group.
 func AddLocationToGroup(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, reqErr := newAddLocationToGroupReq(orgName, apiToken, groupName, location)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[GroupResp](done)
+	parsed, parErr := parseResponse[GroupResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateGroupToken creates a token for a group.
@@ -101,9 +82,9 @@ func CreateGroupToken(orgName, apiToken, groupName, expiration, authorization st
 func RemoveLocationFromGroup(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, reqErr := newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[GroupResp](done)
+	parsed, parErr := parseResponse[GroupResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // InvalidateGroupTokens invalidates all tokens for a group.

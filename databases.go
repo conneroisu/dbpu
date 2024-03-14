@@ -6,37 +6,6 @@ import (
 	"net/http"
 )
 
-// Db is a database.
-type Db struct {
-	ID            string   `json:"DbId"`
-	Hostname      string   `json:"Hostname"`
-	Name          string   `json:"Name"`
-	Group         string   `json:"group"`
-	PrimaryRegion string   `json:"primaryRegion"`
-	Regions       []string `json:"regions"`
-	Type          string   `json:"type"`
-	Version       string   `json:"version"`
-}
-
-// Dbs is a list of dbs.
-type Dbs struct {
-	Databases []Db `json:"databases"`
-}
-
-// DbResp is a response to creating a database.
-type DbResp struct {
-	Database Db `json:"database"`
-}
-
-// DbTokenConfig is a configuration for creating a database token.
-type DbTokenConfig struct {
-	expiration    string // Expiration time for the token (e.g., 2w1d30m).
-	authorization string // Authorization level for the token (full-access or read-only).
-}
-
-// newDbTokenOpt is a functional option for configuring a CreateDatabaseTokenConfig.
-type newDbTokenOpt func(*DbTokenConfig)
-
 // NewCreateDatabaseTokenConfig returns a new CreateDatabaseTokenConfig.
 func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
 	c := &DbTokenConfig{
@@ -50,6 +19,13 @@ func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
 }
 
 // WithExpiration sets the expiration time for the token (e.g., 2w1d30m).
+//
+// Example:
+//
+//	token, err := CreateDatabaseToken("orgName", "dbName", "apiToken", WithExpiration("2w1d30m"))
+//	if err != nil {
+//	  fmt.Println(err)
+//	}
 func WithExpiration(expiration string) newDbTokenOpt {
 	return func(c *DbTokenConfig) { c.expiration = expiration }
 }
@@ -63,9 +39,9 @@ func WithAuthorization(authorization string) newDbTokenOpt {
 func CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
 	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[DbResp](done)
+	parsed, parErr := parseResponse[DbResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(response.Database, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed.Database, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
@@ -120,14 +96,7 @@ func newCreateDatabaseReq(orgToken, orgName, name, group string) (*http.Request,
 		"%s/organizations/%s/databases",
 		tursoEndpoint, orgName,
 	)
-	reqJsonBody := fmt.Sprintf(
-		`{
-			"name": "%s", 
-			"group": "%s"
-		}`,
-		name,
-		group,
-	)
+	reqJsonBody := fmt.Sprintf(`{ "name": "%s", "group": "%s" }`, name, group)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)

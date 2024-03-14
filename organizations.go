@@ -6,70 +6,6 @@ import (
 	"net/http"
 )
 
-type DeleteOrgMemberResp struct {
-	Member string `json:"member"`
-}
-
-// Org is a response to listing organizations.
-type Org struct {
-	BlockedReads  bool   `json:"blocked_reads"`  // indicates if the organization is blocked from reading data
-	BlockedWrites bool   `json:"blocked_writes"` // indicates if the organization is blocked from writing data
-	Name          string `json:"name"`           // the name of the organization
-	Overages      bool   `json:"overages"`       // indicates if the organization is over its limits
-	Slug          string `json:"slug"`           // the slug of the organization
-	Type          string `json:"type"`           // the type of the organization
-	Token         string `json:"token"`          // the token of the organization
-}
-
-// UpdateOrganiationOptions is a functional collective option type for updating an organization.
-type UpdateOrganiationOptions func(*Org)
-
-// AuditLogs is a response to listing organizations.
-type AuditLogs struct {
-	AuditLogs  []AuditLog `json:"audit_logs"` // the audit logs
-	Pagination Pagination `json:"pagination"` // the pagination
-}
-
-// AuditLog is a response to listing organizations.
-type AuditLog struct {
-	Author    string `json:"author"`     // the author of the audit log
-	Code      string `json:"code"`       // the code of the audit log
-	CreatedAt string `json:"created_at"` // the creation date of the audit log
-	Data      string `json:"data"`       // the data of the audit log
-	Message   string `json:"message"`    // the message of the audit log
-	Origin    string `json:"origin"`     // the origin of the audit log
-}
-
-// Pagination is a response to listing organizations.
-type Pagination struct {
-	Page       int `json:"page"`
-	PageSize   int `json:"page_size"`
-	TotalPages int `json:"total_pages"`
-	TotalRows  int `json:"total_rows"`
-}
-
-type Invite struct {
-	Accepted       bool   `json:"Accepted"`       // indicates if the invite has been Accepted
-	CreatedAt      string `json:"CreatedAt"`      // the creation date of the Invite
-	DeletedAt      string `json:"DeletedAt"`      // the deletion date of the Invite
-	Email          string `json:"Email"`          // the email of the Invite
-	ID             int    `json:"ID"`             // the ID of the Invite
-	Organization   Org    `json:"Organization"`   // the organization of the Invite
-	OrganizationID int    `json:"OrganizationID"` // the ID of the organization of the Invite
-	Role           string `json:"Role"`           // the role of the Invite
-	Token          string `json:"Token"`          // the token of the Invite
-	UpdatedAt      string `json:"UpdatedAt"`      // the update date of the Invite
-}
-
-type Invites struct {
-	Invites []Invite `json:"invites"` // the invites
-}
-
-type Member struct {
-	Role     string `json:"role"`     // the role of the member
-	Username string `json:"username"` // the username of the member
-}
-
 // WithBlockedReads is a functional configuration for updating an organization setting the blockedReads field.
 func WithBlockedReads(blockedReads bool) UpdateOrganiationOptions {
 	return func(c *Org) { c.BlockedReads = blockedReads }
@@ -104,9 +40,9 @@ func WithType(orgType string) UpdateOrganiationOptions {
 func ListOrganizations(apiToken string) ([]Org, error) {
 	req, reqErr := newListOrgReq(apiToken)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[[]Org](done)
+	parsed, parErr := parseResponse[[]Org](done)
 	done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // NewUpdateOrganiationConfig returns a new UpdateOrganiationConfig.
@@ -176,9 +112,9 @@ func ListInvites(apiToken, orgName string) ([]Invite, error) {
 func CreateInvite(apiToken, orgName, email, role string) (Invite, error) {
 	req, reqErr := newCreateInviteReq(apiToken, orgName, email, role)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[Invite](done)
+	parsed, parErr := parseResponse[Invite](done)
 	done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // NewUpdateOrganizationRequest returns a new http.Request for updating an organization.
