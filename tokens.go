@@ -5,39 +5,6 @@ import (
 	"net/http"
 )
 
-// ApiToken is a response to creating a new API token.
-type ApiToken struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Token string `json:"token"`
-}
-
-// Token is a response to listing API tokens.
-type Token struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// ListToksResp is a response to listing API tokens.
-type ListToksResp struct {
-	Tokens []Token `json:"tokens"`
-}
-
-// Jwt is a JSON Web Token.
-type Jwt struct {
-	Jwt string `json:"jwt"` // jwt is the JSON Web Token.
-}
-
-// ValidTokResp is a response to creating a new API token.
-type ValidTokResp struct {
-	Exp int `json:"exp"`
-}
-
-// RevokeTokResp is a response to revoking an API token.
-type RevokeTokResp struct {
-	Token string `json:"token"`
-}
-
 // CreateToken creates a new API token with the given name.
 func CreateToken(apiToken, tokenName string) (ApiToken, error) {
 	req, reqErr := newCreateTokenRequest(tokenName)
