@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+type DeleteOrgMemberResp struct {
+	Member string `json:"member"`
+}
+
 // Org is a response to listing organizations.
 type Org struct {
 	BlockedReads  bool   `json:"blocked_reads"`  // indicates if the organization is blocked from reading data
@@ -44,50 +48,44 @@ type Pagination struct {
 	TotalRows  int `json:"total_rows"`
 }
 
-// WithBlockedReads is a functional configuration for updating an organization.
-// It sets the BlockedReads field of an organization when used with
-// NewUpdateOrganiationConfig.
+type Member struct {
+	Role     string `json:"role"`     // the role of the member
+	Username string `json:"username"` // the username of the member
+}
+
+// WithBlockedReads is a functional configuration for updating an organization setting the blockedReads field.
 func WithBlockedReads(blockedReads bool) UpdateOrganiationOptions {
 	return func(c *Org) { c.BlockedReads = blockedReads }
 }
 
-// WithBlockedWrites is a functional configuration for updating an organization.
-// It sets the BlockedWrites field of an organization when used with
-// NewUpdateOrganiationConfig.
+// WithBlockedWrites is a functional configuration for updating an organization	setting the blockedWrites field.
 func WithBlockedWrites(blockedWrites bool) UpdateOrganiationOptions {
 	return func(c *Org) { c.BlockedWrites = blockedWrites }
 }
 
-// WithName is a functional configuration for updating an organization.
-// It sets the Name field of an organization when used with
-// NewUpdateOrganiationConfig.
+// WithName is a functional configuration for updating an organization setting the name field.
 func WithName(name string) UpdateOrganiationOptions {
 	return func(c *Org) { c.Name = name }
 }
 
-// WithOverages is a functional configuration for updating an organization.
-// It sets the Overages field of an organization when used with
-// NewUpdateOrganiationConfig.
+// WithOverages is a functional configuration for updating an organization setting the overages field.
 func WithOverages(overages bool) UpdateOrganiationOptions {
 	return func(c *Org) { c.Overages = overages }
 }
 
-// WithSlug is a functional configuration for updating an organization.
-// It sets the Slug field of an organization.
+// WithSlug is a functional configuration for updating an organization setting the slug field.
 func WithSlug(slug string) UpdateOrganiationOptions {
 	return func(c *Org) { c.Slug = slug }
 }
 
-// WithType is a functional configuration for updating an organization.
-// It sets the Type field of an organization when used with
-// NewUpdateOrganiationConfig.
+// WithType is a functional configuration for updating an organization setting the type field.
 func WithType(orgType string) UpdateOrganiationOptions {
 	return func(c *Org) { c.Type = orgType }
 }
 
 // ListOrganizations lists the organizations that the user has access to.
 func ListOrganizations(apiToken string) ([]Org, error) {
-	req, reqErr := newListOrganizationsRequest(apiToken)
+	req, reqErr := newListOrgReq(apiToken)
 	done, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[[]Org](done)
 	done.Body.Close()
@@ -114,17 +112,43 @@ func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptio
 // It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
 func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
 	config := NewUpdateOrganiationConfig(organization, opts...)
-	req, reqErr := newUpdateOrganizationRequest(organization.Name, config)
+	req, reqErr := newUpdateOrgReq(organization.Name, config)
 	done, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[Org](done)
 	done.Body.Close()
 	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
+// ListOrgMembers lists the members of the organization with the given name.
+func ListOrgMembers(apiToken, orgName string) ([]Member, error) {
+	req, reqErr := newListOrgMembersReq(apiToken, orgName)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[[]Member](done)
+	done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
+// AddOrgMember adds a member to the organization with the given name.
+func AddOrgMember(apiToken, orgName, username, role string) (Member, error) {
+	req, reqErr := newAddOrgMemberReq(apiToken, orgName, username, role)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[Member](done)
+	done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
+// DeleteOrgMember deletes the member with the given username from the organization with the given name.
+func DeleteOrgMember(apiToken, orgName, username string) (DeleteOrgMemberResp, error) {
+	req, reqErr := newDeleteOrgMemberReq(apiToken, orgName, username)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[DeleteOrgMemberResp](done)
+	done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
 // NewUpdateOrganizationRequest returns a new http.Request for updating an organization.
 // It is used to update an organization with the UpdateOrganization function.
-// It is not exported.
-func newUpdateOrganizationRequest(orgName string, config Org) (*http.Request, error) {
+func newUpdateOrgReq(orgName string, config Org) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s",
 		tursoEndpoint, orgName,
@@ -150,8 +174,8 @@ func newUpdateOrganizationRequest(orgName string, config Org) (*http.Request, er
 	return req, err
 }
 
-// newListOrganizationsRequest returns a new http.Request for listing organizations.
-func newListOrganizationsRequest(apiToken string) (*http.Request, error) {
+// newListOrgReq returns a new http.Request for listing organizations.
+func newListOrgReq(apiToken string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations", tursoEndpoint)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -159,4 +183,42 @@ func newListOrganizationsRequest(apiToken string) (*http.Request, error) {
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, nil
+}
+
+// newListOrgMembersReq returns a new http.Request for listing organization members.
+func newListOrgMembersReq(apiToken, orgName string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/members", tursoEndpoint, orgName)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error reading request. %v", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	return req, nil
+}
+
+// AddOrgMember adds a member to the organization with the given name.
+func newAddOrgMemberReq(apiToken, orgName, username, role string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/members", tursoEndpoint, orgName)
+	reqJsonBody := fmt.Sprintf(
+		`{
+			"role": "%s", 
+			"username": "%s"
+		}`,
+		role,
+		username,
+	)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	return req, err
+
+}
+
+// newDeleteOrgMemberReq returns a new http.Request for deleting an organization member.
+func newDeleteOrgMemberReq(apiToken, orgName, username string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/members/%s", tursoEndpoint, orgName, username)
+	req, err := http.NewRequest("DELETE", url, nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Content-Type", "application/json")
+	return req, err
 }

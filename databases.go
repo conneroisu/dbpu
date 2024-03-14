@@ -89,16 +89,13 @@ func ListDatabases(orgName, orgToken string) (Dbs, error) {
 
 // newListDatabasesReq creates a request for listing all databases in an organization.
 func newListDatabasesReq(orgName, orgToken string) (*http.Request, error) {
-	url := fmt.Sprintf(
-		"%s/organizations/%s/databases",
-		tursoEndpoint, orgName,
-	)
+	url := fmt.Sprintf("%s/organizations/%s/databases", tursoEndpoint, orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request: %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
 	return req, nil
 }
 
@@ -112,6 +109,7 @@ func newCreateDatabaseTokenReq(orgName, dbName, apiTok string, config *DbTokenCo
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request for database token: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiTok))
 	return req, nil
 }
@@ -134,7 +132,7 @@ func newCreateDatabaseReq(orgToken, orgName, name, group string) (*http.Request,
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
 	return req, nil
 }

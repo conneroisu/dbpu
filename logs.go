@@ -22,5 +22,6 @@ func newGetAuditLogsRequest(apiToken, orgName string) (*http.Request, error) {
 		return nil, fmt.Errorf("Error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }

@@ -55,34 +55,19 @@ func CreateGroup(orgName, apiToken, groupName, location string) (GroupResp, erro
 
 // GetGroup gets a group in an organization.
 func GetGroup(orgName, apiToken, groupName string) (GroupResp, error) {
-	req, err := newGetGroupReq(orgName, apiToken, groupName)
-	if err != nil {
-		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return GroupResp{}, fmt.Errorf("Error sending request. %v", err)
-	}
-	response, err := parseResponse[GroupResp](resp)
-	if err != nil {
-		return GroupResp{}, fmt.Errorf("Error decoding body. %v", err)
-	}
-	defer resp.Body.Close()
-	return response, nil
+	req, reqErr := newGetGroupReq(orgName, apiToken, groupName)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[GroupResp](done)
+	defer done.Body.Close()
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // DeleteGroup deletes a group in an organization.
-func DeleteGroup(orgName, apiToken, groupName string) error {
+func DeleteGroup(orgName, apiToken, groupName string) (*http.Response, error) {
 	req, err := newDeleteGroupReq(orgName, apiToken, groupName)
-	if err != nil {
-		return fmt.Errorf("Error creating request. %v", err)
-	}
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil {
-		return fmt.Errorf("Error sending request. %v", err)
-	}
-	defer resp.Body.Close()
-	return nil
+	done, err := (&http.Client{}).Do(req)
+	done.Body.Close()
+	return resolveApiCall(done, wReqError(err), wDoError(err))
 }
 
 // TransferGroup transfers a group to a new organization.
@@ -170,8 +155,8 @@ func newCreateGroupReq(orgName, apiToken, groupName, location string) (*http.Req
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, nil
 }
 
@@ -182,6 +167,7 @@ func newGroupTokenReq(orgName, apiToken, groupName, expiration, authorization st
 	if err != nil {
 		return nil, fmt.Errorf("error creating request. %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, nil
 }
@@ -207,6 +193,7 @@ func newGetGroupReq(orgName, apiToken, groupName string) (*http.Request, error) 
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }
 
@@ -251,8 +238,8 @@ func newTransferGroupReq(orgName, apiToken, groupName, newOrgName string) (*http
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, nil
 }
 
@@ -264,5 +251,6 @@ func newAddLocationToGroupReq(orgName, apiToken, groupName, location string) (*h
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }

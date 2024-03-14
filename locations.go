@@ -17,7 +17,7 @@ func ClosestLocation() (ServerClient, error) {
 	done, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[ServerClient](done)
 	defer done.Body.Close()
-	return resolveApiCall(response, withReqError(reqErr), withDoError(doErr), withParError(parErr))
+	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // newClosestLocationRequest creates a request for ClosestLocation.
