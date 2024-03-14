@@ -60,7 +60,7 @@ func WithAuthorization(authorization string) newDbTokenOpt {
 }
 
 // CreateDatabase creates a database with the given name and group.
-func CreateDatabase(orgToken string, orgName string, name string, group string) (Db, error) {
+func CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
 	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
 	resp, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[DbResp](resp)
@@ -69,7 +69,7 @@ func CreateDatabase(orgToken string, orgName string, name string, group string) 
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
-func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
+func CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
 	config := newDbTokenConfig(opts...)
 	req, reqErr := newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
 	resp, doErr := (&http.Client{}).Do(req)
@@ -79,7 +79,7 @@ func CreateDatabaseToken(orgName string, dbName string, apiTok string, opts ...n
 }
 
 // ListDatabases lists all databases for an organization.
-func ListDatabases(orgName string, orgToken string) (Dbs, error) {
+func ListDatabases(orgName, orgToken string) (Dbs, error) {
 	req, reqErr := newListDatabasesReq(orgName, orgToken)
 	resp, doErr := (&http.Client{}).Do(req)
 	dbs, parErr := parseResponse[Dbs](resp)
@@ -88,7 +88,7 @@ func ListDatabases(orgName string, orgToken string) (Dbs, error) {
 }
 
 // newListDatabasesReq creates a request for listing all databases in an organization.
-func newListDatabasesReq(orgName string, orgToken string) (*http.Request, error) {
+func newListDatabasesReq(orgName, orgToken string) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s/databases",
 		tursoEndpoint, orgName,
@@ -103,7 +103,7 @@ func newListDatabasesReq(orgName string, orgToken string) (*http.Request, error)
 }
 
 // newCreateDatabaseTokenReq creates a request for creating a token for a database owned by an organization.
-func newCreateDatabaseTokenReq(orgName string, dbName string, apiTok string, config *DbTokenConfig) (*http.Request, error) {
+func newCreateDatabaseTokenReq(orgName, dbName, apiTok string, config *DbTokenConfig) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s/databases/%s/auth/tokens?expiration=%s&authorization=%s",
 		tursoEndpoint, orgName, dbName, config.expiration, config.authorization,
@@ -117,7 +117,7 @@ func newCreateDatabaseTokenReq(orgName string, dbName string, apiTok string, con
 }
 
 // newCreateDatabaseReq returns a new http.Request for creating a database.
-func newCreateDatabaseReq(orgToken string, orgName string, name string, group string) (*http.Request, error) {
+func newCreateDatabaseReq(orgToken, orgName, name, group string) (*http.Request, error) {
 	url := fmt.Sprintf(
 		"%s/organizations/%s/databases",
 		tursoEndpoint, orgName,

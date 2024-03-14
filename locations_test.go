@@ -17,7 +17,7 @@ func testCreateClosestLocationRequest(t *testing.T) {
 }
 
 // TestServerClientParse tests the server client parse function.
-func testServerClientParse(t *testing.T) {
+func testLocationsParse(t *testing.T) {
 	// Test the parse struct.
 	body := []byte(`{"server":"test","client":"test"}`)
 	serverClient, err := parseStruct[ServerClient](body)

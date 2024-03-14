@@ -51,3 +51,35 @@ func testUpdateOrganizationConfigs(t *testing.T) {
 		}
 	})
 }
+
+// testOrganizationsParse tests the parsing of organization objects.
+func testOrganizationsParse(t *testing.T) {
+	t.Run("Test Parse Organizations", func(t *testing.T) {
+		body := []byte(`[{"name":"test","slug":"test","type":"test","overages":true,"blocked_reads":true,"blocked_writes":true}]`)
+		orgs, err := parseStruct[[]Org](body)
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+		if len(orgs) != 1 {
+			t.Errorf("Expected orgs to have 1 element, got %v", len(orgs))
+		}
+		if orgs[0].Name != "test" {
+			t.Errorf("Expected Name to be test, got %v", orgs[0].Name)
+		}
+		if orgs[0].Slug != "test" {
+			t.Errorf("Expected Slug to be test, got %v", orgs[0].Slug)
+		}
+		if orgs[0].Type != "test" {
+			t.Errorf("Expected Type to be test, got %v", orgs[0].Type)
+		}
+		if orgs[0].Overages != true {
+			t.Errorf("Expected Overages to be true, got %v", orgs[0].Overages)
+		}
+		if orgs[0].BlockedReads != true {
+			t.Errorf("Expected BlockedReads to be true, got %v", orgs[0].BlockedReads)
+		}
+		if orgs[0].BlockedWrites != true {
+			t.Errorf("Expected BlockedWrites to be true, got %v", orgs[0].BlockedWrites)
+		}
+	})
+}

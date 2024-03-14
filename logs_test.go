@@ -28,7 +28,7 @@ func testCreateGetAuditLogsRequest(t *testing.T) {
 }
 
 // TestParseAuditLogs tests the parse audit logs.
-func testParseAuditLogs(t *testing.T) {
+func testLogsParse(t *testing.T) {
 	// Test the parse audit logs
 	t.Run("Test Parse Audit Logs", func(t *testing.T) {
 		body := []byte(`
