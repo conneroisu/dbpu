@@ -20,8 +20,23 @@ The following example creates a new database.
 
 ```go
 // func CreateDatabase(orgToken string, orgName string, name string, group string) (Db, error) {
-db, err := dbpu.CreateDatabase("orgToken", "orgName", "dbName", "group")
-if err != nil {
-    log.Fatal(err)
+package main
+
+import (
+    "fmt"
+    "os"
+    "github.com/conneroisu/dbpu"
+    "github.com/google/uuid"
+)
+
+func main() {
+    orgToken := os.Getenv("ORG_TOKEN")
+    orgName := os.Getenv("ORG_NAME")
+    dbName := uuid.New().String()
+    db, err := dbpu.CreateDatabase(orgToken, orgName, dbName, "default")
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(db)
 }
 ```

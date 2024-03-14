@@ -48,6 +48,23 @@ type Pagination struct {
 	TotalRows  int `json:"total_rows"`
 }
 
+type Invite struct {
+	Accepted       bool   `json:"Accepted"`       // indicates if the invite has been Accepted
+	CreatedAt      string `json:"CreatedAt"`      // the creation date of the Invite
+	DeletedAt      string `json:"DeletedAt"`      // the deletion date of the Invite
+	Email          string `json:"Email"`          // the email of the Invite
+	ID             int    `json:"ID"`             // the ID of the Invite
+	Organization   Org    `json:"Organization"`   // the organization of the Invite
+	OrganizationID int    `json:"OrganizationID"` // the ID of the organization of the Invite
+	Role           string `json:"Role"`           // the role of the Invite
+	Token          string `json:"Token"`          // the token of the Invite
+	UpdatedAt      string `json:"UpdatedAt"`      // the update date of the Invite
+}
+
+type Invites struct {
+	Invites []Invite `json:"invites"` // the invites
+}
+
 type Member struct {
 	Role     string `json:"role"`     // the role of the member
 	Username string `json:"username"` // the username of the member
@@ -114,34 +131,52 @@ func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiat
 	config := NewUpdateOrganiationConfig(organization, opts...)
 	req, reqErr := newUpdateOrgReq(organization.Name, config)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[Org](done)
+	parsed, parErr := parseResponse[Org](done)
 	done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListOrgMembers lists the members of the organization with the given name.
 func ListOrgMembers(apiToken, orgName string) ([]Member, error) {
 	req, reqErr := newListOrgMembersReq(apiToken, orgName)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[[]Member](done)
+	parsed, parErr := parseResponse[[]Member](done)
 	done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // AddOrgMember adds a member to the organization with the given name.
 func AddOrgMember(apiToken, orgName, username, role string) (Member, error) {
 	req, reqErr := newAddOrgMemberReq(apiToken, orgName, username, role)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[Member](done)
+	parsed, parErr := parseResponse[Member](done)
 	done.Body.Close()
-	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // DeleteOrgMember deletes the member with the given username from the organization with the given name.
 func DeleteOrgMember(apiToken, orgName, username string) (DeleteOrgMemberResp, error) {
 	req, reqErr := newDeleteOrgMemberReq(apiToken, orgName, username)
 	done, doErr := (&http.Client{}).Do(req)
-	response, parErr := parseResponse[DeleteOrgMemberResp](done)
+	parsed, parErr := parseResponse[DeleteOrgMemberResp](done)
+	done.Body.Close()
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
+// ListInvites lists the invites of the organization with the given name.
+func ListInvites(apiToken, orgName string) ([]Invite, error) {
+	req, reqErr := newListInvitesReq(apiToken, orgName)
+	done, doErr := (&http.Client{}).Do(req)
+	parsed, parErr := parseResponse[[]Invite](done)
+	done.Body.Close()
+	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+}
+
+// CreateInvite creates an invite for the organization with the given name.
+func CreateInvite(apiToken, orgName, email, role string) (Invite, error) {
+	req, reqErr := newCreateInviteReq(apiToken, orgName, email, role)
+	done, doErr := (&http.Client{}).Do(req)
+	response, parErr := parseResponse[Invite](done)
 	done.Body.Close()
 	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
@@ -220,5 +255,34 @@ func newDeleteOrgMemberReq(apiToken, orgName, username string) (*http.Request, e
 	req, err := http.NewRequest("DELETE", url, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	req.Header.Set("Content-Type", "application/json")
+	return req, err
+}
+
+// newListInvitesReq returns a new http.Request for listing organization invites.
+func newListInvitesReq(apiToken, orgName string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/invites", tursoEndpoint, orgName)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error reading request. %v", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+// newCreateInviteReq returns a new http.Request for creating an organization invite.
+func newCreateInviteReq(apiToken, orgName, email, role string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/invites", tursoEndpoint, orgName)
+	reqJsonBody := fmt.Sprintf(
+		`{
+			"email": "%s", 
+			"role": "%s"
+		}`,
+		email,
+		role,
+	)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, err
 }
