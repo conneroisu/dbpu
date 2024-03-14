@@ -6,7 +6,7 @@ import (
 )
 
 // GetAuditLogs gets the audit logs for the given organization.
-func GetAuditLogs(apiToken string, orgName string) (AuditLogs, error) {
+func GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
 	req, reqErr := newGetAuditLogsRequest(apiToken, orgName)
 	resp, doErr := (&http.Client{}).Do(req)
 	response, parErr := parseResponse[AuditLogs](resp)
@@ -15,7 +15,7 @@ func GetAuditLogs(apiToken string, orgName string) (AuditLogs, error) {
 }
 
 // newGetAuditLogsRequest creates a request for GetAuditLogs.
-func newGetAuditLogsRequest(apiToken string, orgName string) (*http.Request, error) {
+func newGetAuditLogsRequest(apiToken, orgName string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/audit-logs", orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

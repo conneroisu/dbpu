@@ -39,7 +39,7 @@ type RevokeTokResp struct {
 }
 
 // CreateToken creates a new API token with the given name.
-func CreateToken(apiToken string, tokenName string) (ApiToken, error) {
+func CreateToken(apiToken, tokenName string) (ApiToken, error) {
 	req, reqErr := newCreateTokenRequest(tokenName)
 	resp, doErr := (&http.Client{}).Do(req)
 	apiTokenResp, parErr := parseResponse[ApiToken](resp)
@@ -66,7 +66,7 @@ func ListTokens(apiToken string) (ListToksResp, error) {
 }
 
 // RevokeToken revokes the given API token.
-func RevokeToken(apiToken string, tokenName string) (RevokeTokResp, error) {
+func RevokeToken(apiToken, tokenName string) (RevokeTokResp, error) {
 	req, reqErr := newRevokeTokenRequest(apiToken, tokenName)
 	resp, doErr := (&http.Client{}).Do(req)
 	revokeTokResponse, parErr := parseResponse[RevokeTokResp](resp)
@@ -107,7 +107,7 @@ func newListTokensRequest(apiToken string) (*http.Request, error) {
 }
 
 // newRevokeTokenRequest creates a request for revoking an API token.
-func newRevokeTokenRequest(apiToken string, tokenName string) (*http.Request, error) {
+func newRevokeTokenRequest(apiToken, tokenName string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/auth/api-tokens/%s", tursoEndpoint, tokenName)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {

@@ -27,7 +27,7 @@ type ListGroupsResp struct {
 }
 
 // AddLocation adds a location to a group.
-func AddLocation(orgName string, apiToken string, groupName string, location string) (GroupResp, error) {
+func AddLocation(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, err := newAddLocationReq(orgName, apiToken, groupName, location)
 	if err != nil {
 		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -45,7 +45,7 @@ func AddLocation(orgName string, apiToken string, groupName string, location str
 }
 
 // ListGroups lists the groups in an organization.
-func ListGroups(orgName string, apiToken string) (ListGroupsResp, error) {
+func ListGroups(orgName, apiToken string) (ListGroupsResp, error) {
 	req, err := newListGroupsReq(orgName, apiToken)
 	if err != nil {
 		return ListGroupsResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -63,7 +63,7 @@ func ListGroups(orgName string, apiToken string) (ListGroupsResp, error) {
 }
 
 // CreateGroup creates a group in an organization.
-func CreateGroup(orgName string, apiToken string, groupName string, location string) (GroupResp, error) {
+func CreateGroup(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, err := newCreateGroupReq(orgName, apiToken, groupName, location)
 	if err != nil {
 		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -81,7 +81,7 @@ func CreateGroup(orgName string, apiToken string, groupName string, location str
 }
 
 // GetGroup gets a group in an organization.
-func GetGroup(orgName string, apiToken string, groupName string) (GroupResp, error) {
+func GetGroup(orgName, apiToken, groupName string) (GroupResp, error) {
 	req, err := newGetGroupReq(orgName, apiToken, groupName)
 	if err != nil {
 		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -99,7 +99,7 @@ func GetGroup(orgName string, apiToken string, groupName string) (GroupResp, err
 }
 
 // DeleteGroup deletes a group in an organization.
-func DeleteGroup(orgName string, apiToken string, groupName string) error {
+func DeleteGroup(orgName, apiToken, groupName string) error {
 	req, err := newDeleteGroupReq(orgName, apiToken, groupName)
 	if err != nil {
 		return fmt.Errorf("Error creating request. %v", err)
@@ -113,7 +113,7 @@ func DeleteGroup(orgName string, apiToken string, groupName string) error {
 }
 
 // TransferGroup transfers a group to a new organization.
-func TransferGroup(orgName string, apiToken string, groupName string, newOrgName string) (Group, error) {
+func TransferGroup(orgName, apiToken, groupName, newOrgName string) (Group, error) {
 	req, err := newTransferGroupReq(orgName, apiToken, groupName, newOrgName)
 	if err != nil {
 		return Group{}, fmt.Errorf("Error creating request. %v", err)
@@ -131,7 +131,7 @@ func TransferGroup(orgName string, apiToken string, groupName string, newOrgName
 }
 
 // AddLocationToGroup adds a location to a group.
-func AddLocationToGroup(orgName string, apiToken string, groupName string, location string) (GroupResp, error) {
+func AddLocationToGroup(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, err := newAddLocationToGroupReq(orgName, apiToken, groupName, location)
 	if err != nil {
 		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -149,7 +149,7 @@ func AddLocationToGroup(orgName string, apiToken string, groupName string, locat
 }
 
 // CreateGroupToken creates a token for a group.
-func CreateGroupToken(orgName string, apiToken string, groupName string, expiration string, authorization string) (Jwt, error) {
+func CreateGroupToken(orgName, apiToken, groupName, expiration, authorization string) (Jwt, error) {
 	req, err := newGroupTokenReq(orgName, apiToken, groupName, expiration, authorization)
 	if err != nil {
 		return Jwt{}, fmt.Errorf("Error creating request. %v", err)
@@ -167,7 +167,7 @@ func CreateGroupToken(orgName string, apiToken string, groupName string, expirat
 }
 
 // RemoveLocationFromGroup removes a location from a group.
-func RemoveLocationFromGroup(orgName string, apiToken string, groupName string, location string) (GroupResp, error) {
+func RemoveLocationFromGroup(orgName, apiToken, groupName, location string) (GroupResp, error) {
 	req, err := newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location)
 	if err != nil {
 		return GroupResp{}, fmt.Errorf("Error creating request. %v", err)
@@ -185,7 +185,7 @@ func RemoveLocationFromGroup(orgName string, apiToken string, groupName string, 
 }
 
 // UpdateVersionGroup updates the version group.
-func UpdateVersionGroup(orgName string, apiToken string, groupName string) error {
+func UpdateVersionGroup(orgName, apiToken, groupName string) error {
 	req, err := newUpdateGroupReq(orgName, apiToken, groupName)
 	if err != nil {
 		return fmt.Errorf("Error creating request. %v", err)
@@ -199,7 +199,7 @@ func UpdateVersionGroup(orgName string, apiToken string, groupName string) error
 }
 
 // newRemoveLocationFromGroupReq creates a request for removing a location from a group.
-func newRemoveLocationFromGroupReq(orgName string, apiToken string, groupName string, location string) (*http.Request, error) {
+func newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
@@ -210,7 +210,7 @@ func newRemoveLocationFromGroupReq(orgName string, apiToken string, groupName st
 }
 
 // newInvalidateGroupTokensRequest creates a request for invalidating all tokens for a group.
-func newInvalidateGroupTokensRequest(orgName string, apiToken string, groupName string) (*http.Request, error) {
+func newInvalidateGroupTokensRequest(orgName, apiToken, groupName string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/auth/rotate", orgName, groupName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -221,7 +221,7 @@ func newInvalidateGroupTokensRequest(orgName string, apiToken string, groupName 
 }
 
 // InvalidateGroupTokens invalidates all tokens for a group.
-func InvalidateGroupTokens(orgName string, apiToken string, groupName string) error {
+func InvalidateGroupTokens(orgName, apiToken, groupName string) error {
 	req, reqErr := newInvalidateGroupTokensRequest(orgName, apiToken, groupName)
 	resp, resErr := (&http.Client{}).Do(req)
 	if errors.Join(reqErr, resErr) != nil {
@@ -232,7 +232,7 @@ func InvalidateGroupTokens(orgName string, apiToken string, groupName string) er
 }
 
 // newCreateGroupReq creates a request for creating a group in an organization.
-func newCreateGroupReq(orgName string, apiToken string, groupName string, location string) (*http.Request, error) {
+func newCreateGroupReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups", orgName)
 	payload := fmt.Sprintf(`{"name": "%s", "location": "%s"}`, groupName, location)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
@@ -245,7 +245,7 @@ func newCreateGroupReq(orgName string, apiToken string, groupName string, locati
 }
 
 // newGroupTokenReq creates a request for creating a token for a group.
-func newGroupTokenReq(orgName string, apiToken string, groupName string, expiration string, authorization string) (*http.Request, error) {
+func newGroupTokenReq(orgName, apiToken, groupName, expiration, authorization string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/auth/tokens?expiration=%s&authorization=%s", orgName, groupName, expiration, authorization)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -256,7 +256,7 @@ func newGroupTokenReq(orgName string, apiToken string, groupName string, expirat
 }
 
 // newUpdateGroupReq creates a request for updating a group.
-func newUpdateGroupReq(orgName string, apiToken string, groupName string) (*http.Request, error) {
+func newUpdateGroupReq(orgName, apiToken, groupName string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/update", orgName, groupName)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -267,7 +267,7 @@ func newUpdateGroupReq(orgName string, apiToken string, groupName string) (*http
 }
 
 // newGetGroupReq creates a request for getting a group.
-func newGetGroupReq(orgName string, apiToken string, groupName string) (*http.Request, error) {
+func newGetGroupReq(orgName, apiToken, groupName string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations/%s/groups/%s",
 		tursoEndpoint, orgName, groupName,
 	)
@@ -280,7 +280,7 @@ func newGetGroupReq(orgName string, apiToken string, groupName string) (*http.Re
 }
 
 // newAddLocationReq creates a request for adding a location to a group.
-func newAddLocationReq(orgName string, apiToken string, groupName string, location string) (*http.Request, error) {
+func newAddLocationReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s/locations/%s", orgName, groupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -291,7 +291,7 @@ func newAddLocationReq(orgName string, apiToken string, groupName string, locati
 }
 
 // newListGroupsReq creates a request for listing groups.
-func newListGroupsReq(orgName string, apiToken string) (*http.Request, error) {
+func newListGroupsReq(orgName, apiToken string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups", orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -302,7 +302,7 @@ func newListGroupsReq(orgName string, apiToken string) (*http.Request, error) {
 }
 
 // newDeleteGroupReq creates a request for deleting a group.
-func newDeleteGroupReq(orgName string, apiToken string, groupName string) (*http.Request, error) {
+func newDeleteGroupReq(orgName, apiToken, groupName string) (*http.Request, error) {
 	url := fmt.Sprintf(tursoEndpoint+"/organizations/%s/groups/%s", orgName, groupName)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
@@ -313,7 +313,7 @@ func newDeleteGroupReq(orgName string, apiToken string, groupName string) (*http
 }
 
 // newTransferGroupReq creates a request for transferring a group to a new organization.
-func newTransferGroupReq(orgName string, apiToken string, groupName string, newOrgName string) (*http.Request, error) {
+func newTransferGroupReq(orgName, apiToken, groupName, newOrgName string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations/%s/groups/%s/transfer", tursoEndpoint, orgName, groupName)
 	payload := fmt.Sprintf(`{"organization": "%s"}`, newOrgName)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
@@ -326,7 +326,7 @@ func newTransferGroupReq(orgName string, apiToken string, groupName string, newO
 }
 
 // newAddLocationToGroupReq creates a request for adding a location to a group.
-func newAddLocationToGroupReq(orgName string, apiToken string, groupName string, location string) (*http.Request, error) {
+func newAddLocationToGroupReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", tursoEndpoint, orgName, groupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
