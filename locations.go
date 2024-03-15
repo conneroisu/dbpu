@@ -6,18 +6,18 @@ import (
 )
 
 // ClosestLocation returns the closest location to the given latitude and longitude.
-func ClosestLocation() (ServerClient, error) {
+func (c *Client) ClosestLocation() (ServerClient, error) {
 	req, reqErr := newClosestLocationRequest()
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[ServerClient](done)
 	defer done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListLocations returns a list of locations.
-func ListLocations(apiToken string) (Locations, error) {
+func (c *Client) ListLocations(apiToken string) (Locations, error) {
 	req, reqErr := newListLocationsReq(apiToken)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Locations](done)
 	defer done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))

@@ -6,36 +6,36 @@ import (
 )
 
 // CreateToken creates a new API token with the given name.
-func CreateToken(apiToken, tokenName string) (ApiToken, error) {
+func (c *Client) CreateToken(apiToken, tokenName string) (ApiToken, error) {
 	req, reqErr := newCreateTokenRequest(tokenName)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	apiTokenResp, parErr := parseResponse[ApiToken](done)
 	defer done.Body.Close()
 	return resolveApiCall(apiTokenResp, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ValidateToken validates the given API token beloning to a user.
-func ValidateToken(apiToken string) (ValidTokResp, error) {
+func (c *Client) ValidateToken(apiToken string) (ValidTokResp, error) {
 	req, reqErr := newValidateTokenRequest(apiToken)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](done)
 	defer done.Body.Close()
 	return resolveApiCall(parseDatabaseResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListTokens lists the API tokens for the user.
-func ListTokens(apiToken string) (ListToksResp, error) {
+func (c *Client) ListTokens(apiToken string) (ListToksResp, error) {
 	req, reqErr := newListTokensRequest(apiToken)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, respErr := parseResponse[ListToksResp](done)
 	defer done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(respErr))
 }
 
 // RevokeToken revokes the given API token.
-func RevokeToken(apiToken, tokenName string) (RevokeTokResp, error) {
+func (c *Client) RevokeToken(apiToken, tokenName string) (RevokeTokResp, error) {
 	req, reqErr := newRevokeTokenRequest(apiToken, tokenName)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	revokeTokResponse, parErr := parseResponse[RevokeTokResp](done)
 	defer done.Body.Close()
 	return resolveApiCall(revokeTokResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))

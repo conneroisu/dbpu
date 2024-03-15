@@ -6,9 +6,9 @@ import (
 )
 
 // GetAuditLogs gets the audit logs for the given organization.
-func GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
+func (c *Client) GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
 	req, reqErr := newGetAuditLogsRequest(apiToken, orgName)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	response, parErr := parseResponse[AuditLogs](done)
 	defer done.Body.Close()
 	return resolveApiCall(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))

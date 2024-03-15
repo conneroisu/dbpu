@@ -19,13 +19,6 @@ func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
 }
 
 // WithExpiration sets the expiration time for the token (e.g., 2w1d30m).
-//
-// Example:
-//
-//	token, err := CreateDatabaseToken("orgName", "dbName", "apiToken", WithExpiration("2w1d30m"))
-//	if err != nil {
-//	  fmt.Println(err)
-//	}
 func WithExpiration(expiration string) newDbTokenOpt {
 	return func(c *DbTokenConfig) { c.expiration = expiration }
 }
@@ -36,28 +29,28 @@ func WithAuthorization(authorization string) newDbTokenOpt {
 }
 
 // CreateDatabase creates a database with the given name and group.
-func CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
+func (c *Client) CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
 	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[DbResp](done)
 	defer done.Body.Close()
 	return resolveApiCall(parsed.Database, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
-func CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
+func (c *Client) CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
 	config := newDbTokenConfig(opts...)
 	req, reqErr := newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	jwt, parErr := parseResponse[Jwt](done)
 	defer done.Body.Close()
 	return resolveApiCall(jwt, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListDatabases lists all databases for an organization.
-func ListDatabases(orgName, orgToken string) (Dbs, error) {
+func (c *Client) ListDatabases(orgName, orgToken string) (Dbs, error) {
 	req, reqErr := newListDatabasesReq(orgName, orgToken)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	dbs, parErr := parseResponse[Dbs](done)
 	defer done.Body.Close()
 	return resolveApiCall(dbs, wReqError(reqErr), wDoError(doErr), wParError(parErr))

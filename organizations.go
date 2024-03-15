@@ -37,81 +37,65 @@ func WithType(orgType string) UpdateOrganiationOptions {
 }
 
 // ListOrganizations lists the organizations that the user has access to.
-func ListOrganizations(apiToken string) ([]Org, error) {
+func (c *Client) ListOrganizations(apiToken string) ([]Org, error) {
 	req, reqErr := newListOrgReq(apiToken)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Org](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
-// NewUpdateOrganiationConfig returns a new UpdateOrganiationConfig.
-func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptions) Org {
-	config := Org{
-		BlockedReads:  organization.BlockedReads,
-		BlockedWrites: organization.BlockedWrites,
-		Name:          organization.Name,
-		Overages:      organization.Overages,
-		Slug:          organization.Slug,
-		Type:          organization.Type,
-	}
-	for _, opt := range opts {
-		opt(&config)
-	}
-	return config
-}
-
 // UpdateOrganiation updates the organization with the given name.
 // It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
-func UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
+func (c *Client) UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
 	config := NewUpdateOrganiationConfig(organization, opts...)
 	req, reqErr := newUpdateOrgReq(organization.Name, config)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Org](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListOrgMembers lists the members of the organization with the given name.
-func ListOrgMembers(apiToken, orgName string) ([]Member, error) {
+func (c *Client) ListOrgMembers(apiToken, orgName string) ([]Member, error) {
 	req, reqErr := newListOrgMembersReq(apiToken, orgName)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Member](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // AddOrgMember adds a member to the organization with the given name.
-func AddOrgMember(apiToken, orgName, username, role string) (Member, error) {
+func (c *Client) AddOrgMember(apiToken, orgName, username, role string) (Member, error) {
 	req, reqErr := newAddOrgMemberReq(apiToken, orgName, username, role)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Member](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // DeleteOrgMember deletes the member with the given username from the organization with the given name.
-func DeleteOrgMember(apiToken, orgName, username string) (DeleteOrgMemberResp, error) {
+func (c *Client) DeleteOrgMember(apiToken, orgName, username string) (DeleteOrgMemberResp, error) {
 	req, reqErr := newDeleteOrgMemberReq(apiToken, orgName, username)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[DeleteOrgMemberResp](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListInvites lists the invites of the organization with the given name.
-func ListInvites(apiToken, orgName string) ([]Invite, error) {
+func (c *Client) ListInvites(apiToken, orgName string) ([]Invite, error) {
 	req, reqErr := newListInvitesReq(apiToken, orgName)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Invite](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateInvite creates an invite for the organization with the given name.
-func CreateInvite(apiToken, orgName, email, role string) (Invite, error) {
+func (c *Client) CreateInvite(apiToken, orgName, email, role string) (Invite, error) {
 	req, reqErr := newCreateInviteReq(apiToken, orgName, email, role)
-	done, doErr := (&http.Client{}).Do(req)
+	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Invite](done)
 	done.Body.Close()
 	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
@@ -221,4 +205,20 @@ func newCreateInviteReq(apiToken, orgName, email, role string) (*http.Request, e
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	return req, err
+}
+
+// NewUpdateOrganiationConfig returns a new UpdateOrganiationConfig.
+func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptions) Org {
+	config := Org{
+		BlockedReads:  organization.BlockedReads,
+		BlockedWrites: organization.BlockedWrites,
+		Name:          organization.Name,
+		Overages:      organization.Overages,
+		Slug:          organization.Slug,
+		Type:          organization.Type,
+	}
+	for _, opt := range opts {
+		opt(&config)
+	}
+	return config
 }
