@@ -1,10 +1,27 @@
 package dbpu
 
 import (
-	"bytes"
-	"fmt"
-	"net/http"
+	"time"
 )
+
+// Database is a database.
+type Database struct {
+	ID            string   `json:"DbId"`
+	Hostname      string   `json:"Hostname"`
+	Name          string   `json:"Name"`
+	Group         string   `json:"group"`
+	PrimaryRegion string   `json:"primaryRegion"`
+	Regions       []string `json:"regions"`
+	Type          string   `json:"type"`
+	Version       string   `json:"version"`
+}
+
+type DBSeed struct {
+	Type      string     `json:"type"`
+	Name      string     `json:"value,omitempty"`
+	URL       string     `json:"url,omitempty"`
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
 
 // NewCreateDatabaseTokenConfig returns a new CreateDatabaseTokenConfig.
 func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
@@ -29,72 +46,56 @@ func WithAuthorization(authorization string) newDbTokenOpt {
 }
 
 // CreateDatabase creates a database with the given name and group.
-func (c *Client) CreateDatabase(orgToken, orgName, name, group string) (Db, error) {
-	req, reqErr := newCreateDatabaseReq(orgToken, orgName, name, group)
-	done, doErr := c.Do(req)
-	parsed, parErr := parseResponse[DbResp](done)
+func (c *Client) CreateDatabase(orgToken, orgName, name, group string) (Database, error) {
+	req, err := c.newCreateDatabaseReq(orgToken, orgName, name, group)
+	if err != nil {
+		return Database{}, err
+	}
+	done, err := c.Do(req)
+	if err != nil {
+		return Database{}, err
+	}
 	defer done.Body.Close()
-	return resolveApiCall(parsed.Database, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	parsed, err := parseResponse[DbResp](done)
+	if err != nil {
+		return Database{}, err
+	}
+	return parsed.Database, nil
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
 func (c *Client) CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (Jwt, error) {
 	config := newDbTokenConfig(opts...)
-	req, reqErr := newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
-	done, doErr := c.Do(req)
-	jwt, parErr := parseResponse[Jwt](done)
+	req, err := c.newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
+	if err != nil {
+		return Jwt{}, err
+	}
+	done, err := c.Do(req)
+	if err != nil {
+		return Jwt{}, err
+	}
 	defer done.Body.Close()
-	return resolveApiCall(jwt, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	jwt, err := parseResponse[Jwt](done)
+	if err != nil {
+		return Jwt{}, err
+	}
+	return jwt, nil
 }
 
 // ListDatabases lists all databases for an organization.
 func (c *Client) ListDatabases(orgName, orgToken string) (Dbs, error) {
-	req, reqErr := newListDatabasesReq(orgName, orgToken)
-	done, doErr := c.Do(req)
-	dbs, parErr := parseResponse[Dbs](done)
+	req, err := c.newListDatabasesReq(orgName, orgToken)
+	if err != nil {
+		return Dbs{}, err
+	}
+	done, err := c.Do(req)
+	if err != nil {
+		return Dbs{}, err
+	}
 	defer done.Body.Close()
-	return resolveApiCall(dbs, wReqError(reqErr), wDoError(doErr), wParError(parErr))
-}
-
-// newListDatabasesReq creates a request for listing all databases in an organization.
-func newListDatabasesReq(orgName, orgToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/databases", tursoEndpoint, orgName)
-	req, err := http.NewRequest("GET", url, nil)
+	dbs, err := parseResponse[Dbs](done)
 	if err != nil {
-		return nil, fmt.Errorf("error reading request: %v", err)
+		return Dbs{}, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
-	return req, nil
-}
-
-// newCreateDatabaseTokenReq creates a request for creating a token for a database owned by an organization.
-func newCreateDatabaseTokenReq(orgName, dbName, apiTok string, config *DbTokenConfig) (*http.Request, error) {
-	url := fmt.Sprintf(
-		"%s/organizations/%s/databases/%s/auth/tokens?expiration=%s&authorization=%s",
-		tursoEndpoint, orgName, dbName, config.expiration, config.authorization,
-	)
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request for database token: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiTok))
-	return req, nil
-}
-
-// newCreateDatabaseReq returns a new http.Request for creating a database.
-func newCreateDatabaseReq(orgToken, orgName, name, group string) (*http.Request, error) {
-	url := fmt.Sprintf(
-		"%s/organizations/%s/databases",
-		tursoEndpoint, orgName,
-	)
-	reqJsonBody := fmt.Sprintf(`{ "name": "%s", "group": "%s" }`, name, group)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", orgToken))
-	return req, nil
+	return dbs, nil
 }

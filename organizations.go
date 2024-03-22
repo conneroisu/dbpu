@@ -1,11 +1,5 @@
 package dbpu
 
-import (
-	"bytes"
-	"fmt"
-	"net/http"
-)
-
 // WithBlockedReads is a functional configuration for updating an organization setting the blockedReads field.
 func WithBlockedReads(blockedReads bool) UpdateOrganiationOptions {
 	return func(c *Org) { c.BlockedReads = blockedReads }
@@ -38,187 +32,65 @@ func WithType(orgType string) UpdateOrganiationOptions {
 
 // ListOrganizations lists the organizations that the user has access to.
 func (c *Client) ListOrganizations(apiToken string) ([]Org, error) {
-	req, reqErr := newListOrgReq(apiToken)
+	req, reqErr := c.newListOrgReq(apiToken)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Org](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // UpdateOrganiation updates the organization with the given name.
 // It is used to update an organization to match the UpdateOrganiationOptions passed as opts.
 func (c *Client) UpdateOrganiation(apiToken string, organization Org, opts ...UpdateOrganiationOptions) (Org, error) {
 	config := NewUpdateOrganiationConfig(organization, opts...)
-	req, reqErr := newUpdateOrgReq(organization.Name, config)
+	req, reqErr := c.newUpdateOrgReq(organization.Name, config)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Org](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListOrgMembers lists the members of the organization with the given name.
 func (c *Client) ListOrgMembers(apiToken, orgName string) ([]Member, error) {
-	req, reqErr := newListOrgMembersReq(apiToken, orgName)
+	req, reqErr := c.newListOrgMembersReq(apiToken, orgName)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Member](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // AddOrgMember adds a member to the organization with the given name.
 func (c *Client) AddOrgMember(apiToken, orgName, username, role string) (Member, error) {
-	req, reqErr := newAddOrgMemberReq(apiToken, orgName, username, role)
+	req, reqErr := c.newAddOrgMemberReq(apiToken, orgName, username, role)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Member](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // DeleteOrgMember deletes the member with the given username from the organization with the given name.
 func (c *Client) DeleteOrgMember(apiToken, orgName, username string) (DeleteOrgMemberResp, error) {
-	req, reqErr := newDeleteOrgMemberReq(apiToken, orgName, username)
+	req, reqErr := c.newDeleteOrgMemberReq(apiToken, orgName, username)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[DeleteOrgMemberResp](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListInvites lists the invites of the organization with the given name.
 func (c *Client) ListInvites(apiToken, orgName string) ([]Invite, error) {
-	req, reqErr := newListInvitesReq(apiToken, orgName)
+	req, reqErr := c.newListInvitesReq(apiToken, orgName)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[[]Invite](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // CreateInvite creates an invite for the organization with the given name.
 func (c *Client) CreateInvite(apiToken, orgName, email, role string) (Invite, error) {
-	req, reqErr := newCreateInviteReq(apiToken, orgName, email, role)
+	req, reqErr := c.newCreateInviteReq(apiToken, orgName, email, role)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Invite](done)
 	done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
-}
-
-// NewUpdateOrganizationRequest returns a new http.Request for updating an organization.
-// It is used to update an organization with the UpdateOrganization function.
-func newUpdateOrgReq(orgName string, config Org) (*http.Request, error) {
-	url := fmt.Sprintf(
-		"%s/organizations/%s",
-		tursoEndpoint, orgName,
-	)
-	reqJsonBody := fmt.Sprintf(
-		`{
-			"blocked_reads": %t, 
-			"blocked_writes": %t, 
-			"name": "%s", 
-			"overages": %t, 
-			"slug": "%s", 
-			"type": "%s"
-		}`,
-		config.BlockedReads,
-		config.BlockedWrites,
-		config.Name,
-		config.Overages,
-		config.Slug,
-		config.Type,
-	)
-	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer([]byte(reqJsonBody)))
-	req.Header.Set("Content-Type", "application/json")
-	return req, err
-}
-
-// newListOrgReq returns a new http.Request for listing organizations.
-func newListOrgReq(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations", tursoEndpoint)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
-// newListOrgMembersReq returns a new http.Request for listing organization members.
-func newListOrgMembersReq(apiToken, orgName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/members", tursoEndpoint, orgName)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
-// AddOrgMember adds a member to the organization with the given name.
-func newAddOrgMemberReq(apiToken, orgName, username, role string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/members", tursoEndpoint, orgName)
-	reqJsonBody := fmt.Sprintf(
-		`{
-			"role": "%s", 
-			"username": "%s"
-		}`,
-		role,
-		username,
-	)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, err
-
-}
-
-// newDeleteOrgMemberReq returns a new http.Request for deleting an organization member.
-func newDeleteOrgMemberReq(apiToken, orgName, username string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/members/%s", tursoEndpoint, orgName, username)
-	req, err := http.NewRequest("DELETE", url, nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	req.Header.Set("Content-Type", "application/json")
-	return req, err
-}
-
-// newListInvitesReq returns a new http.Request for listing organization invites.
-func newListInvitesReq(apiToken, orgName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/invites", tursoEndpoint, orgName)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	req.Header.Set("Content-Type", "application/json")
-	return req, nil
-}
-
-// newCreateInviteReq returns a new http.Request for creating an organization invite.
-func newCreateInviteReq(apiToken, orgName, email, role string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/invites", tursoEndpoint, orgName)
-	reqJsonBody := fmt.Sprintf(
-		`{
-			"email": "%s", 
-			"role": "%s"
-		}`,
-		email,
-		role,
-	)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, err
-}
-
-// NewUpdateOrganiationConfig returns a new UpdateOrganiationConfig.
-func NewUpdateOrganiationConfig(organization Org, opts ...UpdateOrganiationOptions) Org {
-	config := Org{
-		BlockedReads:  organization.BlockedReads,
-		BlockedWrites: organization.BlockedWrites,
-		Name:          organization.Name,
-		Overages:      organization.Overages,
-		Slug:          organization.Slug,
-		Type:          organization.Type,
-	}
-	for _, opt := range opts {
-		opt(&config)
-	}
-	return config
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }

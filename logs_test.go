@@ -9,9 +9,10 @@ import (
 func testCreateGetAuditLogsRequest(t *testing.T) {
 	// Test the create get audit logs request
 	t.Run("Test Create Get Audit Logs Request", func(t *testing.T) {
+		c := NewClient()
 		apiToken := "test"
 		orgName := "test"
-		req, err := newGetAuditLogsRequest(apiToken, orgName)
+		req, err := c.newGetAuditLogsRequest(apiToken, orgName)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}

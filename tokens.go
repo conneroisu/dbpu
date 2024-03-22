@@ -1,85 +1,37 @@
 package dbpu
 
-import (
-	"fmt"
-	"net/http"
-)
-
 // CreateToken creates a new API token with the given name.
 func (c *Client) CreateToken(apiToken, tokenName string) (ApiToken, error) {
-	req, reqErr := newCreateTokenRequest(tokenName)
+	req, reqErr := c.newCreateTokenRequest(tokenName)
 	done, doErr := c.Do(req)
 	apiTokenResp, parErr := parseResponse[ApiToken](done)
 	defer done.Body.Close()
-	return resolveApiCall(apiTokenResp, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(apiTokenResp, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ValidateToken validates the given API token beloning to a user.
 func (c *Client) ValidateToken(apiToken string) (ValidTokResp, error) {
-	req, reqErr := newValidateTokenRequest(apiToken)
+	req, reqErr := c.newValidateTokenRequest(apiToken)
 	done, doErr := c.Do(req)
-	parseDatabaseResponse, parErr := parseResponse[ValidTokResp](done)
+	par, parErr := parseResponse[ValidTokResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(parseDatabaseResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(par, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListTokens lists the API tokens for the user.
 func (c *Client) ListTokens(apiToken string) (ListToksResp, error) {
-	req, reqErr := newListTokensRequest(apiToken)
+	req, reqErr := c.newListTokensRequest(apiToken)
 	done, doErr := c.Do(req)
-	parsed, respErr := parseResponse[ListToksResp](done)
+	par, respErr := parseResponse[ListToksResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(respErr))
+	return resolveApi(par, wReqError(reqErr), wDoError(doErr), wParError(respErr))
 }
 
 // RevokeToken revokes the given API token.
 func (c *Client) RevokeToken(apiToken, tokenName string) (RevokeTokResp, error) {
-	req, reqErr := newRevokeTokenRequest(apiToken, tokenName)
+	req, reqErr := c.newRevokeTokenRequest(apiToken, tokenName)
 	done, doErr := c.Do(req)
-	revokeTokResponse, parErr := parseResponse[RevokeTokResp](done)
+	par, parErr := parseResponse[RevokeTokResp](done)
 	defer done.Body.Close()
-	return resolveApiCall(revokeTokResponse, wReqError(reqErr), wDoError(doErr), wParError(parErr))
-}
-
-// newCreateTokenRequest creates a request for creating a new API token.
-func newCreateTokenRequest(tokenName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/auth/api-tokens/%s", tursoEndpoint, tokenName)
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating request. %v", err)
-	}
-	return req, nil
-}
-
-// newValidateTokenRequest creates a request for validating an API token.
-func newValidateTokenRequest(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/auth/validate", tursoEndpoint)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
-// newListTokensRequest creates a request for listing API tokens.
-func newListTokensRequest(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/auth/api-tokens", tursoEndpoint)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
-// newRevokeTokenRequest creates a request for revoking an API token.
-func newRevokeTokenRequest(apiToken, tokenName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/auth/api-tokens/%s", tursoEndpoint, tokenName)
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error reading request. %v", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
+	return resolveApi(par, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }

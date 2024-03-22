@@ -75,7 +75,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newAddLocation request generation", func(t *testing.T) {
-		req, err := newAddLocationReq("test", "test", "test", "test")
+		c := NewClient()
+		req, err := c.newAddLocationReq("test", "test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -95,7 +96,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newCreateGroupReq request generation", func(t *testing.T) {
-		req, err := newCreateGroupReq("test", "test", "test", "test")
+		c := NewClient()
+		req, err := c.newCreateGroupReq("test", "test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -115,7 +117,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newDeleteGroupReq request generation", func(t *testing.T) {
-		req, err := newDeleteGroupReq("test", "test", "test")
+		c := NewClient()
+		req, err := c.newDeleteGroupReq("test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -135,7 +138,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newGetGroupReq request generation", func(t *testing.T) {
-		req, err := newGetGroupReq("test", "test", "test")
+		c := NewClient()
+		req, err := c.newGetGroupReq("test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -155,7 +159,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newListGroupsReq request generation", func(t *testing.T) {
-		req, err := newListGroupsReq("test", "test")
+		c := NewClient()
+		req, err := c.newListGroupsReq("test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -175,7 +180,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newDeleteLocationReq request generation", func(t *testing.T) {
-		req, err := newDeleteGroupReq("test", "test", "test")
+		c := NewClient()
+		req, err := c.newDeleteGroupReq("test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}
@@ -195,7 +201,8 @@ func testParseGroups(t *testing.T) {
 	})
 
 	t.Run("Testing newUpdateGroupReq request generation", func(t *testing.T) {
-		req, err := newUpdateGroupReq("test", "test", "test")
+		c := NewClient()
+		req, err := c.newUpdateGroupReq("test", "test", "test")
 		if err != nil {
 			t.Errorf("Error creating request. %v", err)
 		}

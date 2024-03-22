@@ -1,25 +1,13 @@
 package dbpu
 
-// Db is a database.
-type Db struct {
-	ID            string   `json:"DbId"`
-	Hostname      string   `json:"Hostname"`
-	Name          string   `json:"Name"`
-	Group         string   `json:"group"`
-	PrimaryRegion string   `json:"primaryRegion"`
-	Regions       []string `json:"regions"`
-	Type          string   `json:"type"`
-	Version       string   `json:"version"`
-}
-
 // Dbs is a list of dbs.
 type Dbs struct {
-	Databases []Db `json:"databases"`
+	Databases []Database `json:"databases"`
 }
 
 // DbResp is a response to creating a database.
 type DbResp struct {
-	Database Db `json:"database"`
+	Database Database `json:"database"`
 }
 
 // DbTokenConfig is a configuration for creating a database token.

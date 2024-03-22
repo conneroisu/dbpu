@@ -80,8 +80,8 @@ func newResolveApiConfig(opts ...resolveApiOpt) *resolveApiConfig {
 	return config
 }
 
-// resolveApiCall resolves the API call by joining the request, do, and parse errors.
-func resolveApiCall[Obj any](obj Obj, opts ...resolveApiOpt) (Obj, error) {
+// resolveApi resolves the API call by joining the request, do, and parse errors.
+func resolveApi[Obj any](obj Obj, opts ...resolveApiOpt) (Obj, error) {
 	config := newResolveApiConfig(opts...)
 	if err := errors.Join(config.ReqError, config.DoError, config.ParError); err != nil {
 		return obj, fmt.Errorf("error resolving API. %v", err)

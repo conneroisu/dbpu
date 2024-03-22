@@ -93,7 +93,8 @@ func TestCreateCreateTokenRquest(t *testing.T) {
 	// Test the create create token request.
 	t.Run("Test Create Create Token Request", func(t *testing.T) {
 		tokenName := "test"
-		req, err := newCreateTokenRequest(tokenName)
+		c := NewClient()
+		req, err := c.newCreateTokenRequest(tokenName)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}

@@ -7,7 +7,8 @@ import (
 // TestCreateClosestLocationRequest tests the create closest location request function.
 func testCreateClosestLocationRequest(t *testing.T) {
 	// Test the create closest location request.
-	req, err := newClosestLocationRequest()
+	c := NewClient()
+	req, err := c.newClosestLocationRequest()
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}

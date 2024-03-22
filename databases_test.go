@@ -16,7 +16,7 @@ func testParsing(t *testing.T) {
 				"regions":["test"]
 			}
 		`)
-		db, err := parseStruct[Db](body)
+		db, err := parseStruct[Database](body)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
@@ -43,25 +43,24 @@ func testCreateCreateDatabaseRequest(t *testing.T) {
 		Name:  "org",
 		Token: "token",
 	}
-	db := Db{
+	db := Database{
 		Name:    "name",
 		Group:   "group",
 		ID:      "id",
 		Type:    "type",
 		Regions: []string{"region1", "region2"},
 	}
-	req, err := newCreateDatabaseReq(org.Token, org.Name, db.Name, db.Group)
+	c := NewClient()
+	req, err := c.newCreateDatabaseReq(org.Token, org.Name, db.Name, db.Group)
 	if err != nil {
 		t.Errorf("error creating request. %v", err)
 	}
 	if req.Method != "POST" {
 		t.Errorf("expected POST method. Got %s", req.Method)
 	}
-
 	if req.Header.Get("Authorization") != "Bearer token" {
 		t.Errorf("expected Authorization header to be Bearer token. Got %s", req.Header.Get("Authorization"))
 	}
-
 	if req.Header.Get("Content-Type") != "application/json" {
 		t.Errorf("expected Content-Type header to be application/json. Got %s", req.Header.Get("Content-Type"))
 	}

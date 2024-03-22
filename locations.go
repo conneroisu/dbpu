@@ -1,45 +1,19 @@
 package dbpu
 
-import (
-	"fmt"
-	"net/http"
-)
-
 // ClosestLocation returns the closest location to the given latitude and longitude.
 func (c *Client) ClosestLocation() (ServerClient, error) {
-	req, reqErr := newClosestLocationRequest()
+	req, reqErr := c.newClosestLocationRequest()
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[ServerClient](done)
 	defer done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
 
 // ListLocations returns a list of locations.
 func (c *Client) ListLocations(apiToken string) (Locations, error) {
-	req, reqErr := newListLocationsReq(apiToken)
+	req, reqErr := c.newListLocationsReq(apiToken)
 	done, doErr := c.Do(req)
 	parsed, parErr := parseResponse[Locations](done)
 	defer done.Body.Close()
-	return resolveApiCall(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
-}
-
-// newListLocationsReq creates a request for ListLocations.
-func newListLocationsReq(apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("https://api.turso.tech/v1/locations")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating request. %v", err)
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", apiToken))
-	return req, nil
-}
-
-// newClosestLocationRequest creates a request for ClosestLocation.
-func newClosestLocationRequest() (*http.Request, error) {
-	url := fmt.Sprintf("https://region.turso.io/")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating request. %v", err)
-	}
-	return req, nil
+	return resolveApi(parsed, wReqError(reqErr), wDoError(doErr), wParError(parErr))
 }
