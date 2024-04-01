@@ -1,10 +1,21 @@
 package dbpu
 
+import "fmt"
+
 // GetAuditLogs gets the audit logs for the given organization.
 func (c *Client) GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
-	req, reqErr := c.newGetAuditLogsRequest(apiToken, orgName)
-	done, doErr := c.Do(req)
-	response, parErr := parseResponse[AuditLogs](done)
+	req, err := c.newGetAuditLogsRequest(apiToken, orgName)
+	if err != nil {
+		return AuditLogs{}, fmt.Errorf("failed to create request for audit logs: %v", err)
+	}
+	done, err := c.Do(req)
+	if err != nil {
+		return AuditLogs{}, fmt.Errorf("failed to get audit logs: %v", err)
+	}
+	par, err := parseResponse[AuditLogs](done)
+	if err != nil {
+		return AuditLogs{}, fmt.Errorf("failed to parse response: %v", err)
+	}
 	defer done.Body.Close()
-	return resolveApi(response, wReqError(reqErr), wDoError(doErr), wParError(parErr))
+	return par, nil
 }

@@ -1,5 +1,48 @@
 package dbpu
 
+import "time"
+
+// Database is a database.
+type Database struct {
+	ID            string   `json:"DbId"`
+	Hostname      string   `json:"Hostname"`
+	Name          string   `json:"Name"`
+	Group         string   `json:"group"`
+	PrimaryRegion string   `json:"primaryRegion"`
+	Regions       []string `json:"regions"`
+	Type          string   `json:"type"`
+	Version       string   `json:"version"`
+}
+
+type DBSeed struct {
+	Type      string     `json:"type"`
+	Name      string     `json:"value,omitempty"`
+	URL       string     `json:"url,omitempty"`
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// NewCreateDatabaseTokenConfig returns a new CreateDatabaseTokenConfig.
+func newDbTokenConfig(opts ...newDbTokenOpt) *DbTokenConfig {
+	c := &DbTokenConfig{
+		expiration:    "",
+		authorization: "",
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
+}
+
+// WithExpiration sets the expiration time for the token (e.g., 2w1d30m).
+func WithExpiration(expiration string) newDbTokenOpt {
+	return func(c *DbTokenConfig) { c.expiration = expiration }
+}
+
+// WithAuthorization sets the authorization level for the token (full-access or read-only).
+func WithAuthorization(authorization string) newDbTokenOpt {
+	return func(c *DbTokenConfig) { c.authorization = authorization }
+}
+
 // Dbs is a list of dbs.
 type Dbs struct {
 	Databases []Database `json:"databases"`
@@ -144,4 +187,34 @@ type ValidTokResp struct {
 // RevokeTokResp is a response to revoking an API token.
 type RevokeTokResp struct {
 	Token string `json:"token"`
+}
+
+// WithBlockedReads is a functional configuration for updating an organization setting the blockedReads field.
+func WithBlockedReads(blockedReads bool) UpdateOrganiationOptions {
+	return func(c *Org) { c.BlockedReads = blockedReads }
+}
+
+// WithBlockedWrites is a functional configuration for updating an organization	setting the blockedWrites field.
+func WithBlockedWrites(blockedWrites bool) UpdateOrganiationOptions {
+	return func(c *Org) { c.BlockedWrites = blockedWrites }
+}
+
+// WithName is a functional configuration for updating an organization setting the name field.
+func WithName(name string) UpdateOrganiationOptions {
+	return func(c *Org) { c.Name = name }
+}
+
+// WithOverages is a functional configuration for updating an organization setting the overages field.
+func WithOverages(overages bool) UpdateOrganiationOptions {
+	return func(c *Org) { c.Overages = overages }
+}
+
+// WithSlug is a functional configuration for updating an organization setting the slug field.
+func WithSlug(slug string) UpdateOrganiationOptions {
+	return func(c *Org) { c.Slug = slug }
+}
+
+// WithType is a functional configuration for updating an organization setting the type field.
+func WithType(orgType string) UpdateOrganiationOptions {
+	return func(c *Org) { c.Type = orgType }
 }
