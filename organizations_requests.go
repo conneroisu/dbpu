@@ -47,7 +47,7 @@ func (c *Client) newListOrgReq(apiToken string) (*http.Request, error) {
 
 // newListOrgMembersReq returns a new http.Request for listing organization members.
 func (c *Client) newListOrgMembersReq(apiToken, orgName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/members", tursoEndpoint, orgName)
+	url := fmt.Sprintf("%s/organizations/%s/members", c.BaseURL, orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
@@ -76,7 +76,7 @@ func (c *Client) newAddOrgMemberReq(apiToken, orgName, username, role string) (*
 
 // newDeleteOrgMemberReq returns a new http.Request for deleting an organization member.
 func (c *Client) newDeleteOrgMemberReq(apiToken, orgName, username string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/members/%s", tursoEndpoint, orgName, username)
+	url := fmt.Sprintf("%s/organizations/%s/members/%s", c.BaseURL, orgName, username)
 	req, err := http.NewRequest("DELETE", url, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
 	req.Header.Set("Content-Type", "application/json")

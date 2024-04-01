@@ -19,8 +19,8 @@ func testCreateGetAuditLogsRequest(t *testing.T) {
 		if req.Method != "GET" {
 			t.Errorf("Expected method to be GET, got %v", req.Method)
 		}
-		if req.URL.String() != fmt.Sprintf(tursoEndpoint+"/organizations/%s/audit-logs", orgName) {
-			t.Errorf("Expected URL to be %s, got %v", fmt.Sprintf(tursoEndpoint+"/organizations/%s/audit-logs", orgName), req.URL.String())
+		if req.URL.String() != fmt.Sprintf(c.BaseURL+"/organizations/%s/audit-logs", orgName) {
+			t.Errorf("Expected URL to be %s, got %v", fmt.Sprintf(c.BaseURL+"/organizations/%s/audit-logs", orgName), req.URL.String())
 		}
 		if req.Header.Get("Authorization") != fmt.Sprintf("Bearer %s", apiToken) {
 			t.Errorf("Expected Authorization to be %s, got %v", fmt.Sprintf("Bearer %s", apiToken), req.Header.Get("Authorization"))

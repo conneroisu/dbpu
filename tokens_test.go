@@ -101,8 +101,8 @@ func TestCreateCreateTokenRquest(t *testing.T) {
 		if req.Method != "POST" {
 			t.Errorf("Expected method to be POST, got %v", req.Method)
 		}
-		if req.URL.String() != tursoEndpoint+"/auth/api-tokens/"+tokenName {
-			t.Errorf("Expected URL to be %s, got %v", tursoEndpoint+"/auth/api-tokens/"+tokenName, req.URL.String())
+		if req.URL.String() != c.BaseURL+"/auth/api-tokens/"+tokenName {
+			t.Errorf("Expected URL to be %s, got %v", c.BaseURL+"/auth/api-tokens/"+tokenName, req.URL.String())
 		}
 	})
 }
