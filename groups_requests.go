@@ -8,7 +8,7 @@ import (
 
 // newRemoveLocationFromGroupReq creates a request for removing a location from a group.
 func (c *Client) newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
-	url := fmt.Sprintf("/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading request. %v", err)
@@ -78,7 +78,7 @@ func (c *Client) newGetGroupReq(orgName, apiToken, groupName string) (*http.Requ
 
 // newAddLocationReq creates a request for adding a location to a group.
 func (c *Client) newAddLocationReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
-	url := fmt.Sprintf("/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
@@ -89,7 +89,7 @@ func (c *Client) newAddLocationReq(orgName, apiToken, groupName, location string
 
 // newListGroupsReq creates a request for listing groups.
 func (c *Client) newListGroupsReq(orgName, apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("/organizations/%s/groups", c.BaseURL, orgName)
+	url := fmt.Sprintf("%s/organizations/%s/groups", c.BaseURL, orgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
