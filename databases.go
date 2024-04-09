@@ -2,9 +2,22 @@ package dbpu
 
 import "fmt"
 
+type CreateDatabaseOpts func(*createDbConfig)
+
+type createDbConfig struct {
+	Name       string  `json:"name"`
+	Location   string  `json:"location"`
+	Image      string  `json:"image,omitempty"`
+	Extensions string  `json:"extensions,omitempty"`
+	Group      string  `json:"group,omitempty"`
+	Seed       *DBSeed `json:"seed,omitempty"`
+	Schema     string  `json:"schema,omitempty"`
+	IsSchema   bool    `json:"is_schema,omitempty"`
+}
+
 // CreateDatabase creates a database with the given name and group.
-func (c *Client) CreateDatabase(orgToken, orgName, name, group string) (Database, error) {
-	req, err := c.newCreateDatabaseReq(orgToken, orgName, name, group)
+func (c *Client) CreateDatabase(orgToken, orgName, name, group string, opts ...CreateDatabaseOpts) (Database, error) {
+	req, err := c.newCreateDatabaseReq(name, group)
 	if err != nil {
 		return Database{}, fmt.Errorf("failed to create request for database: %v", err)
 	}
@@ -23,7 +36,7 @@ func (c *Client) CreateDatabase(orgToken, orgName, name, group string) (Database
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
 func (c *Client) CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (*Jwt, error) {
 	config := newDbTokenConfig(opts...)
-	req, err := c.newCreateDatabaseTokenReq(orgName, dbName, apiTok, config)
+	req, err := c.newCreateDatabaseTokenReq(dbName, apiTok, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request for database token: %v", err)
 	}
@@ -40,8 +53,8 @@ func (c *Client) CreateDatabaseToken(orgName, dbName, apiTok string, opts ...new
 }
 
 // ListDatabases lists all databases for an organization.
-func (c *Client) ListDatabases(orgName, orgToken string) (Dbs, error) {
-	req, err := c.newListDatabasesReq(orgName, orgToken)
+func (c *Client) ListDatabases() (Dbs, error) {
+	req, err := c.newListDatabasesReq()
 	if err != nil {
 		return Dbs{}, fmt.Errorf("failed to create request for listing databases: %v", err)
 	}

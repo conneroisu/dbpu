@@ -3,8 +3,8 @@ package dbpu
 import "fmt"
 
 // GetAuditLogs gets the audit logs for the given organization.
-func (c *Client) GetAuditLogs(apiToken, orgName string) (AuditLogs, error) {
-	req, err := c.newGetAuditLogsRequest(apiToken, orgName)
+func (c *Client) GetAuditLogs() (AuditLogs, error) {
+	req, err := c.newGetAuditLogsRequest(c.ApiToken, c.OrgName)
 	if err != nil {
 		return AuditLogs{}, fmt.Errorf("failed to create request for audit logs: %v", err)
 	}
