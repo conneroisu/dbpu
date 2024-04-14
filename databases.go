@@ -16,7 +16,7 @@ type createDbConfig struct {
 }
 
 // CreateDatabase creates a database with the given name and group.
-func (c *Client) CreateDatabase(orgToken, orgName, name, group string, opts ...CreateDatabaseOpts) (Database, error) {
+func (c *Client) CreateDatabase(name, group string, opts ...CreateDatabaseOpts) (Database, error) {
 	req, err := c.newCreateDatabaseReq(name, group)
 	if err != nil {
 		return Database{}, fmt.Errorf("failed to create request for database: %v", err)
@@ -34,7 +34,7 @@ func (c *Client) CreateDatabase(orgToken, orgName, name, group string, opts ...C
 }
 
 // CreateDatabaseToken creates a token for a database owned by an organization with an optional given expiration and authorization.
-func (c *Client) CreateDatabaseToken(orgName, dbName, apiTok string, opts ...newDbTokenOpt) (*Jwt, error) {
+func (c *Client) CreateDatabaseToken(dbName, apiTok string, opts ...newDbTokenOpt) (*Jwt, error) {
 	config := newDbTokenConfig(opts...)
 	req, err := c.newCreateDatabaseTokenReq(dbName, apiTok, config)
 	if err != nil {

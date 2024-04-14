@@ -22,7 +22,7 @@ func (c *Client) ClosestLocation() (*ServerClient, error) {
 
 // ListLocations returns a list of locations.
 func (c *Client) ListLocations(apiToken string) (*Locations, error) {
-	req, err := c.newListLocationsReq(apiToken)
+	req, err := c.newListLocationsReq()
 	if err != nil {
 		return nil, err
 	}

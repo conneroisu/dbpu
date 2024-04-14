@@ -7,13 +7,13 @@ import (
 )
 
 // newRemoveLocationFromGroupReq creates a request for removing a location from a group.
-func (c *Client) newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
+func (c *Client) newRemoveLocationFromGroupReq(location string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, c.OrgName, c.GroupName, location)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.ApiToken))
 	return req, nil
 }
 
@@ -29,7 +29,7 @@ func (c *Client) newInvalidateGroupTokensReq() (*http.Request, error) {
 }
 
 // newCreateGroupReq creates a request for creating a group in an organization.
-func (c *Client) newCreateGroupReq(apiToken, location string) (*http.Request, error) {
+func (c *Client) newCreateGroupReq(location string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations/%s/groups", c.BaseURL, c.OrgName)
 	payload := fmt.Sprintf(`{"name": "%s", "location": "%s"}`, c.GroupName, location)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
@@ -37,7 +37,7 @@ func (c *Client) newCreateGroupReq(apiToken, location string) (*http.Request, er
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.ApiToken))
 	return req, nil
 }
 
@@ -66,36 +66,36 @@ func (c *Client) newUpdateGroupReq() (*http.Request, error) {
 }
 
 // newGetGroupReq creates a request for getting a group.
-func (c *Client) newGetGroupReq(orgName, apiToken, groupName string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/groups/%s", c.BaseURL, orgName, groupName)
+func (c *Client) newGetGroupReq(groupName string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s", c.BaseURL, c.OrgName, groupName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.ApiToken))
 	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }
 
 // newAddLocationReq creates a request for adding a location to a group.
-func (c *Client) newAddLocationReq(orgName, apiToken, groupName, location string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, orgName, groupName, location)
+func (c *Client) newAddLocationReq(location string) (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/groups/%s/locations/%s", c.BaseURL, c.OrgName, c.GroupName, location)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.ApiToken))
 	return req, nil
 }
 
 // newListGroupsReq creates a request for listing groups.
-func (c *Client) newListGroupsReq(orgName, apiToken string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/organizations/%s/groups", c.BaseURL, orgName)
+func (c *Client) newListGroupsReq() (*http.Request, error) {
+	url := fmt.Sprintf("%s/organizations/%s/groups", c.BaseURL, c.OrgName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.ApiToken))
 	return req, nil
 }
 

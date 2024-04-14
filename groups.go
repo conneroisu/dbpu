@@ -6,8 +6,8 @@ import (
 )
 
 // AddLocation adds a location to a group.
-func (c *Client) AddLocation(orgName, apiToken, groupName, location string) (*GroupResp, error) {
-	req, err := c.newAddLocationReq(orgName, apiToken, groupName, location)
+func (c *Client) AddLocation(location string) (*GroupResp, error) {
+	req, err := c.newAddLocationReq(location)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -24,8 +24,8 @@ func (c *Client) AddLocation(orgName, apiToken, groupName, location string) (*Gr
 }
 
 // ListGroups lists the groups in an organization.
-func (c *Client) ListGroups(orgName, apiToken string) (*ListGroupsResp, error) {
-	req, err := c.newListGroupsReq(orgName, apiToken)
+func (c *Client) ListGroups() (*ListGroupsResp, error) {
+	req, err := c.newListGroupsReq()
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -42,8 +42,8 @@ func (c *Client) ListGroups(orgName, apiToken string) (*ListGroupsResp, error) {
 }
 
 // CreateGroup creates a group in an organization.
-func (c *Client) CreateGroup(apiToken, location string) (*GroupResp, error) {
-	req, err := c.newCreateGroupReq(apiToken, location)
+func (c *Client) CreateGroup(location string) (*GroupResp, error) {
+	req, err := c.newCreateGroupReq(location)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -60,8 +60,8 @@ func (c *Client) CreateGroup(apiToken, location string) (*GroupResp, error) {
 }
 
 // GetGroup gets a group in an organization.
-func (c *Client) GetGroup(orgName, apiToken, groupName string) (*GroupResp, error) {
-	req, err := c.newGetGroupReq(orgName, apiToken, groupName)
+func (c *Client) GetGroup() (*GroupResp, error) {
+	req, err := c.newGetGroupReq(c.GroupName)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -96,7 +96,7 @@ func (c *Client) AddLocationToGroup(location string) (*GroupResp, error) {
 }
 
 // CreateGroupToken creates a token for a group.
-func (c *Client) CreateGroupToken(orgName, apiToken, groupName, expiration, authorization string) (*Jwt, error) {
+func (c *Client) CreateGroupToken(expiration, authorization string) (*Jwt, error) {
 	req, err := c.newGroupTokenReq(expiration, authorization)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
@@ -114,8 +114,8 @@ func (c *Client) CreateGroupToken(orgName, apiToken, groupName, expiration, auth
 }
 
 // RemoveLocationFromGroup removes a location from a group.
-func (c *Client) RemoveLocationFromGroup(orgName, apiToken, groupName, location string) (*GroupResp, error) {
-	req, err := c.newRemoveLocationFromGroupReq(orgName, apiToken, groupName, location)
+func (c *Client) RemoveLocationFromGroup(location string) (*GroupResp, error) {
+	req, err := c.newRemoveLocationFromGroupReq(location)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -132,7 +132,7 @@ func (c *Client) RemoveLocationFromGroup(orgName, apiToken, groupName, location 
 }
 
 // InvalidateGroupTokens invalidates all tokens for a group.
-func (c *Client) InvalidateGroupTokens(orgName, apiToken, groupName string) error {
+func (c *Client) InvalidateGroupTokens() error {
 	req, err := c.newInvalidateGroupTokensReq()
 	if err != nil {
 		return fmt.Errorf("error creating request: %v", err)
@@ -146,7 +146,7 @@ func (c *Client) InvalidateGroupTokens(orgName, apiToken, groupName string) erro
 }
 
 // UpdateVersionGroup updates the version group.
-func (c *Client) UpdateVersionGroup(orgName, apiToken, groupName string) (*http.Response, error) {
+func (c *Client) UpdateVersionGroup() (*http.Response, error) {
 	req, err := c.newUpdateGroupReq()
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
