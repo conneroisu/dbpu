@@ -1,6 +1,8 @@
 package dbpu
 
-import "time"
+import (
+	"time"
+)
 
 // Database is a database.
 type Database struct {
@@ -14,6 +16,7 @@ type Database struct {
 	Version       string   `json:"version"`
 }
 
+// DBSeed is a seed for a database.
 type DBSeed struct {
 	Type      string     `json:"type"`
 	Name      string     `json:"value,omitempty"`

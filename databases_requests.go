@@ -2,6 +2,7 @@ package dbpu
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -45,9 +46,12 @@ func (c *Client) newCreateDatabaseTokenReq(dbName, apiTok string, config *DbToke
 }
 
 // newCreateDatabaseReq returns a new http.Request for creating a database.
-func (c *Client) newCreateDatabaseReq(name, group string) (*http.Request, error) {
+func (c *Client) newCreateDatabaseReq(config ...CreateDbConfig) (*http.Request, error) {
 	url := fmt.Sprintf("%s/organizations/%s/databases", c.BaseURL, c.OrgName)
-	reqJsonBody := fmt.Sprintf(`{ "name": "%s", "group": "%s" }`, name, group)
+	reqJsonBody, err := json.Marshal(config)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling request body: %v", err)
+	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(reqJsonBody)))
 	if err != nil {
 		return nil, fmt.Errorf("error reading request. %v", err)

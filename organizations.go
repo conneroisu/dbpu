@@ -17,7 +17,7 @@ func (c *Client) ListOrganizations(apiToken string) (*[]Org, error) {
 		return nil, err
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // UpdateOrganiation updates the organization with the given name.
@@ -37,7 +37,7 @@ func (c *Client) UpdateOrganiation(apiToken string, organization Org, opts ...Up
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // ListOrgMembers lists the members of the organization with the given name.
@@ -55,7 +55,7 @@ func (c *Client) ListOrgMembers(apiToken, orgName string) (*[]Member, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // AddOrgMember adds a member to the organization with the given name.
@@ -73,7 +73,7 @@ func (c *Client) AddOrgMember(apiToken, orgName, username, role string) (*Member
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // DeleteOrgMember deletes the member with the given username from the organization with the given name.
@@ -91,7 +91,7 @@ func (c *Client) DeleteOrgMember(apiToken, orgName, username string) (*DeleteOrg
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // ListInvites lists the invites of the organization with the given name.
@@ -109,7 +109,7 @@ func (c *Client) ListInvites(apiToken, orgName string) (*[]Invite, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // CreateInvite creates an invite for the organization with the given name.
@@ -127,5 +127,5 @@ func (c *Client) CreateInvite(apiToken, orgName, email, role string) (*Invite, e
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }

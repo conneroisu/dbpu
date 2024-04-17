@@ -20,7 +20,7 @@ func (c *Client) AddLocation(location string) (*GroupResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &response, nil
+	return response, nil
 }
 
 // ListGroups lists the groups in an organization.
@@ -38,7 +38,7 @@ func (c *Client) ListGroups() (*ListGroupsResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &response, nil
+	return response, nil
 }
 
 // CreateGroup creates a group in an organization.
@@ -56,7 +56,7 @@ func (c *Client) CreateGroup(location string) (*GroupResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &response, nil
+	return response, nil
 }
 
 // GetGroup gets a group in an organization.
@@ -74,7 +74,7 @@ func (c *Client) GetGroup() (*GroupResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // AddLocationToGroup adds a location to a group.
@@ -92,7 +92,7 @@ func (c *Client) AddLocationToGroup(location string) (*GroupResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // CreateGroupToken creates a token for a group.
@@ -110,7 +110,7 @@ func (c *Client) CreateGroupToken(expiration, authorization string) (*Jwt, error
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &jwt, nil
+	return jwt, nil
 }
 
 // RemoveLocationFromGroup removes a location from a group.
@@ -128,7 +128,7 @@ func (c *Client) RemoveLocationFromGroup(location string) (*GroupResp, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // InvalidateGroupTokens invalidates all tokens for a group.

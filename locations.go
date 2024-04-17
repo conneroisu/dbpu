@@ -17,7 +17,7 @@ func (c *Client) ClosestLocation() (*ServerClient, error) {
 		return nil, err
 	}
 	defer done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }
 
 // ListLocations returns a list of locations.
@@ -35,5 +35,5 @@ func (c *Client) ListLocations(apiToken string) (*Locations, error) {
 		return nil, fmt.Errorf("error parsing response: %v", err)
 	}
 	defer done.Body.Close()
-	return &parsed, nil
+	return parsed, nil
 }

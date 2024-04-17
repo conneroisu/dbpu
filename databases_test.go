@@ -39,12 +39,11 @@ func testParsing(t *testing.T) {
 }
 
 func testCreateCreateDatabaseRequest(t *testing.T) {
-	org := Org{
-		Name:  "org",
-		Token: "token",
-	}
 	c := NewClient()
-	req, err := c.newCreateDatabaseReq(org.Token, org.Name)
+	req, err := c.newCreateDatabaseReq(CreateDbConfig{
+		Name:     "test",
+		Location: "test",
+	})
 	if err != nil {
 		t.Errorf("error creating request. %v", err)
 	}
