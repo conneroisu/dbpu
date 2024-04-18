@@ -2,7 +2,10 @@ module github.com/conneroisu/dbpu
 
 go 1.22.0
 
-require github.com/bytedance/sonic v1.11.1
+require (
+	github.com/bytedance/sonic v1.11.1
+	github.com/google/uuid v1.6.0
+)
 
 require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect

@@ -1,8 +1,11 @@
 package dbpu
 
 import (
-	"fmt"
+	"context"
+	"database/sql"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 // Client is a client for the dbpu API.
@@ -38,66 +41,47 @@ func (c *Client) SetGroupName(name string) { c.GroupName = name }
 // SetApiToken sets the API token of the dbpu client.
 func (c *Client) SetApiToken(token string) { c.ApiToken = token }
 
-type Pool struct {
-	databases map[string]*Database
+type Executor interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }
 
-// A simple key-value pair for the hash table
-type Entry struct {
-	key   string
-	value interface{} // Can store any data type
+type Queries[T Executor] struct {
+	db T
 }
 
-// HashTable struct
-type HashTable struct {
-	table    []Entry // Underlying storage -  a slice of entries
-	capacity int
+func New[T Executor](db T) *Queries[T] {
+	return &Queries[T]{db: db}
 }
 
-// Hash function (a simple one for this example)
-func hash(key string, capacity int) int {
-	sum := 0
-	for _, char := range key {
-		sum += int(char)
-	}
-	return sum % capacity
+func (q *Queries[T]) WithTx(tx *sql.Tx) *Queries[*sql.Tx] {
+	return &Queries[*sql.Tx]{db: tx}
 }
 
-// Create a new hash table
-func NewHashTable(capacity int) *HashTable {
-	return &HashTable{
-		table:    make([]Entry, capacity),
-		capacity: capacity,
-	}
+type HashTable[K comparable, V any] struct {
+	table map[K]V
 }
 
-// Add an item to the hash table
-func (h *HashTable) Add(key string, value interface{}) {
-	index := hash(key, h.capacity)
-	h.table[index] = Entry{key, value}
+func NewHashTable[K comparable, V any]() *HashTable[K, V] {
+	return &HashTable[K, V]{table: make(map[K]V)}
 }
 
-// Get the value associated with a key
-func (h *HashTable) Get(key string) (interface{}, bool) {
-	index := hash(key, h.capacity)
-	entry := h.table[index]
-
-	if entry.key == key {
-		return entry.value, true
-	}
-
-	return nil, false
+func (h *HashTable[K, V]) Set(key K, value V) {
+	h.table[key] = value
 }
 
-func main() {
-	// Create a hash table with initial capacity of 5
-	table := NewHashTable(5)
+func (h *HashTable[K, V]) Get(key K) (V, bool) {
+	val, ok := h.table[key]
+	return val, ok
+}
 
-	table.Add("hello", "world")
-	table.Add("name", "Alice")
+func (h *HashTable[K, V]) Delete(key K) {
+	delete(h.table, key)
+}
 
-	value, found := table.Get("hello")
-	if found {
-		fmt.Println("Value of 'hello':", value)
-	}
+func (q *Queries[T]) Hash() string {
+	// Implementation depends on what makes each query unique in your context
+	return uuid.New().String()
 }
