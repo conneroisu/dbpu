@@ -61,11 +61,15 @@ func (q *Queries[T]) WithTx(tx *sql.Tx) *Queries[*sql.Tx] {
 }
 
 type HashTable[K comparable, V any] struct {
-	table map[K]V
+	table    map[K]V
+	capacity int
 }
 
-func NewHashTable[K comparable, V any]() *HashTable[K, V] {
-	return &HashTable[K, V]{table: make(map[K]V)}
+func NewHashTable[K comparable, V any](capacity int) *HashTable[K, V] {
+	return &HashTable[K, V]{
+		table:    make(map[K]V, capacity),
+		capacity: capacity,
+	}
 }
 
 func (h *HashTable[K, V]) Set(key K, value V) {
