@@ -112,10 +112,10 @@ func (q *Queries[T]) Hash() string {
 
 // GetAll returns all the databases in the hash table.
 // The returned slice is a copy of the databases in the hash table.
-func (h *HashTable[K, V]) GetAll() []*V {
-	var dbs []*V
+func (h *HashTable[K, V]) GetAll() []V {
+	var dbs []V
 	for _, db := range h.table {
-		dbs = append(dbs, &db)
+		dbs = append(dbs, db)
 	}
 	return dbs
 }
