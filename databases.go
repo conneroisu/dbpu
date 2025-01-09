@@ -26,9 +26,9 @@ type Database struct {
 type Config struct {
 	Name       string `json:"name" validate:"required"`
 	Location   string `json:"location" validate:"required"`
+	Group      string `json:"group" validate:"required"`
 	Image      string `json:"image,omitempty"`
 	Extensions string `json:"extensions,omitempty"`
-	Group      string `json:"group,omitempty"`
 	Seed       *Seed  `json:"seed,omitempty"`
 	Schema     string `json:"schema,omitempty"`
 	IsSchema   bool   `json:"is_schema,omitempty"`
@@ -47,11 +47,15 @@ type Seed struct {
 // Options can be provided to configure the database such as location, image,
 // extensions, seed, schema, and isSchema.
 func (c *Client) Create(ctx context.Context, config Config) (*Database, error) {
+	err := c.validate(config)
+	if err != nil {
+		return nil, err
+	}
 	req, err := builders.NewRequest(
 		ctx,
 		c.header,
 		http.MethodPost,
-		fmt.Sprintf("%s/organizations/%s/databases", c.BaseURL, c.OrgName),
+		fmt.Sprintf("%s/organizations/%s/databases", c.baseURL, c.orgName),
 		builders.WithBody(config),
 	)
 	if err != nil {
@@ -102,7 +106,7 @@ func (c *Client) CreateDatabaseToken(
 	}
 	uri, err := url.Parse(fmt.Sprintf(
 		"%s/organizations/%s/databases/%s/auth/tokens",
-		c.BaseURL, c.OrgName, dbName,
+		c.baseURL, c.orgName, dbName,
 	))
 	if err != nil {
 		return "", err
@@ -126,4 +130,26 @@ func (c *Client) CreateDatabaseToken(
 	}
 	err = c.sendRequest(req, &resp)
 	return resp.Token, err
+}
+
+// ServerClient is a struct that contains the server and client locations.
+type ServerClient struct {
+	Server string `json:"server"`
+	Client string `json:"client"`
+}
+
+// ClosestLocation returns the closest location to the current location.
+func (c *Client) ClosestLocation(ctx context.Context) (*ServerClient, error) {
+	req, err := builders.NewRequest(
+		ctx,
+		c.header,
+		http.MethodGet,
+		c.regionURL,
+	)
+	if err != nil {
+		return nil, err
+	}
+	var resp ServerClient
+	err = c.sendRequest(req, &resp)
+	return &resp, err
 }
