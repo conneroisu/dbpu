@@ -1,121 +1,99 @@
 package dbpu
 
 import (
-	"context"
-	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 
-	"github.com/google/uuid"
+	"github.com/conneroisu/dbpu/internal/builders"
+	"github.com/conneroisu/dbpu/internal/tursoerr"
 )
 
-// Client is a client for the dbpu API.
-type Client struct {
-	*http.Client
-	BaseURL   string // Base URL for API requests.
-	RegionURL string // Base URL for region requests.
-	DbFolder  string // Folder for db files.
-	OrgToken  string // Token for organization.
-	OrgName   string // Name of organization.
-	GroupName string // Name of group.
-	ApiToken  string // Token for API.
+type (
+	// Client is a client for the turso API.
+	Client struct {
+		client  *http.Client
+		BaseURL string // Base URL for API requests.
+		OrgName string // Name of organization.
+
+		header   builders.Header
+		apiToken string // Token for API.
+	}
+	// option is a functional option for configuring a Client.
+	option func(*Client)
+)
+
+// WithClient sets the client for the Client.
+func WithClient(client *http.Client) func(*Client) {
+	return func(c *Client) { c.client = client }
 }
 
 // NewClient returns a new client.
 //
 // Base URL is the base URL for API requests.
 // Region URL is the base URL for region requests.
-func NewClient() *Client {
-	return &Client{
-		Client:    http.DefaultClient,
-		BaseURL:   "https://api.turso.tech/v1",
-		RegionURL: "https://region.turso.io",
+func NewClient(apiToken, orgName string, opts ...option) *Client {
+	client := &Client{
+		client:   http.DefaultClient,
+		BaseURL:  "https://api.turso.tech/v1",
+		apiToken: apiToken,
+		OrgName:  orgName,
 	}
-}
-
-// SetOrgToken sets the organization token of the dbpu client.
-func (c *Client) SetOrgToken(token string) { c.OrgToken = token }
-
-// SetOrgName sets the name of the organization to use in the dbpu client.
-func (c *Client) SetOrgName(name string) { c.OrgName = name }
-
-// SetGroupName sets the name of the group to use in the dbpu client.
-func (c *Client) SetGroupName(name string) { c.GroupName = name }
-
-// SetApiToken sets the API token of the dbpu client.
-func (c *Client) SetApiToken(token string) { c.ApiToken = token }
-
-// Executor is an interface for executing SQL queries.
-type Executor interface {
-	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
-	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
-	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
-	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
-}
-
-// Queries is a set of queries.
-type Queries[T Executor] struct {
-	db T
-}
-
-// New returns a new Queries.
-func New[T Executor](db T) *Queries[T] {
-	return &Queries[T]{db: db}
-}
-
-// WithTx returns a new Queries with the transaction.
-func (q *Queries[T]) WithTx(tx *sql.Tx) *Queries[*sql.Tx] {
-	return &Queries[*sql.Tx]{db: tx}
-}
-
-// HashTable is a hash table for storing databases.
-// The key is the unique hash of the database in the table.
-// The value is the resulting database at the hash.
-type HashTable[K comparable, V any] struct {
-	table    map[K]V
-	capacity int
-}
-
-// NewHashTable returns a new hash table.
-// The capacity is the initial capacity of the hash table.
-// However, the capacity will grow as needed.
-func NewHashTable[K comparable, V any](capacity int) *HashTable[K, V] {
-	return &HashTable[K, V]{
-		table:    make(map[K]V, capacity),
-		capacity: capacity,
+	client.header.SetCommonHeaders = func(req *http.Request) {
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", fmt.Sprintf(
+			"Bearer %s",
+			client.apiToken,
+		))
 	}
-}
-
-// Set sets the value for the key.
-// If the key is already in the hash table, the value is updated.
-func (h *HashTable[K, V]) Set(key K, value V) {
-	h.table[key] = value
-}
-
-// Get returns the value for the key.
-// If the key is not in the hash table, the second return value is false.
-func (h *HashTable[K, V]) Get(key K) (V, bool) {
-	val, ok := h.table[key]
-	return val, ok
-}
-
-// Delete removes the key from the hash table.
-// If the key is not in the hash table, this is a no-op.
-func (h *HashTable[K, V]) Delete(key K) {
-	delete(h.table, key)
-}
-
-// Hash returns a unique hash for the query.
-// This is used to identify the query in the table.
-func (q *Queries[T]) Hash() string {
-	return uuid.New().String()
-}
-
-// GetAll returns all the databases in the hash table.
-// The returned slice is a copy of the databases in the hash table.
-func (h *HashTable[K, V]) GetAll() []V {
-	var dbs []V
-	for _, db := range h.table {
-		dbs = append(dbs, db)
+	for _, opt := range opts {
+		opt(client)
 	}
-	return dbs
+	return client
+}
+
+func (c *Client) sendRequest(req *http.Request, v any) error {
+	req.Header.Set("Accept", "application/json")
+	// Check whether Content-Type is already set, Upload Files API requires
+	// Content-Type == multipart/form-data
+	contentType := req.Header.Get("Content-Type")
+	if contentType == "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	res, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if isFailureStatusCode(res) {
+		return c.handleErrorResp(res)
+	}
+	return decode(res.Body, v)
+}
+
+func (c *Client) handleErrorResp(resp *http.Response) error {
+	var errRes tursoerr.ErrorResponse
+	err := json.NewDecoder(resp.Body).Decode(&errRes)
+	if err != nil || errRes.Error == nil {
+		reqErr := &tursoerr.ErrRequest{
+			HTTPStatusCode: resp.StatusCode,
+			Err:            err,
+		}
+		if errRes.Error != nil {
+			reqErr.Err = errRes.Error
+		}
+		return reqErr
+	}
+	errRes.Error.HTTPStatusCode = resp.StatusCode
+	return errRes.Error
+}
+
+func isFailureStatusCode(resp *http.Response) bool {
+	return resp.StatusCode < http.StatusOK ||
+		resp.StatusCode >= http.StatusBadRequest
+}
+
+func decode[T any](r io.Reader, v T) error {
+	return json.NewDecoder(r).Decode(&v)
 }
